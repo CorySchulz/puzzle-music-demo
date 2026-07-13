@@ -1,0 +1,56 @@
+[
+  {
+    "id": "a-lumen",
+    "name": "Lumen",
+    "genre": "Electronic",
+    "followers": 1284000,
+    "monthlyListeners": 3920000,
+    "bio": "Textural electronic music built from field recordings and slow-moving synth pads. Lumen's records feel like weather — patient, enveloping, and always about to break into light.",
+    "accent": { "from": "#7c5cff", "to": "#c86dd7" }
+  },
+  {
+    "id": "a-riverbend",
+    "name": "Riverbend",
+    "genre": "Indie Folk",
+    "followers": 642000,
+    "monthlyListeners": 1510000,
+    "bio": "A songwriter's project of close-mic'd guitars and paper-thin harmonies. Riverbend writes small songs about rivers, roads, and the space between two people.",
+    "accent": { "from": "#e8a04d", "to": "#e05a5a" }
+  },
+  {
+    "id": "a-novaline",
+    "name": "Novaline",
+    "genre": "Synthpop",
+    "followers": 2050000,
+    "monthlyListeners": 5180000,
+    "bio": "Big, glittering synthpop with one foot in 1985 and one in the future. Novaline makes music for night drives and last dances.",
+    "accent": { "from": "#22d3ee", "to": "#3b82f6" }
+  },
+  {
+    "id": "a-koto",
+    "name": "Koto Kudo",
+    "genre": "Jazz",
+    "followers": 318000,
+    "monthlyListeners": 720000,
+    "bio": "Late-night piano trio jazz — brushed drums, upright bass, and a lot of empty space. Recorded mostly live to tape after midnight.",
+    "accent": { "from": "#fb7185", "to": "#f59e0b" }
+  },
+  {
+    "id": "a-veiltone",
+    "name": "Veiltone",
+    "genre": "Dream Pop",
+    "followers": 890000,
+    "monthlyListeners": 2140000,
+    "bio": "Guitars drowned in reverb and vocals that hover just out of reach. Veiltone builds slow, blooming walls of sound — pop songs seen through frosted glass.",
+    "accent": { "from": "#f0abfc", "to": "#6366f1" }
+  },
+  {
+    "id": "a-tapebloom",
+    "name": "Tapebloom",
+    "genre": "Lo-Fi",
+    "followers": 1470000,
+    "monthlyListeners": 3260000,
+    "bio": "Dusty loops, tape hiss, and unhurried drum breaks. Tapebloom makes the kind of beats that turn a rainy afternoon into a whole mood.",
+    "accent": { "from": "#34d399", "to": "#0d9488" }
+  }
+]

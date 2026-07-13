@@ -1,0 +1,98 @@
+[
+  {
+    "id": "al-driftwave",
+    "title": "Drift Wave",
+    "artistId": "a-lumen",
+    "year": 2023,
+    "mood": ["dreamy", "late-night"],
+    "accent": { "from": "#7c5cff", "to": "#c86dd7" }
+  },
+  {
+    "id": "al-halcyon",
+    "title": "Halcyon",
+    "artistId": "a-lumen",
+    "year": 2021,
+    "mood": ["ambient", "warm"],
+    "accent": { "from": "#6d5efc", "to": "#4338ca" }
+  },
+  {
+    "id": "al-emberfield",
+    "title": "Emberfield",
+    "artistId": "a-riverbend",
+    "year": 2022,
+    "mood": ["acoustic", "autumn"],
+    "accent": { "from": "#e8a04d", "to": "#e05a5a" }
+  },
+  {
+    "id": "al-paperboats",
+    "title": "Paper Boats",
+    "artistId": "a-riverbend",
+    "year": 2019,
+    "mood": ["gentle", "folk"],
+    "accent": { "from": "#f0b86c", "to": "#c2683f" }
+  },
+  {
+    "id": "al-neoncoast",
+    "title": "Neon Coast",
+    "artistId": "a-novaline",
+    "year": 2024,
+    "mood": ["upbeat", "retro"],
+    "accent": { "from": "#22d3ee", "to": "#3b82f6" }
+  },
+  {
+    "id": "al-afterglow",
+    "title": "Afterglow",
+    "artistId": "a-novaline",
+    "year": 2022,
+    "mood": ["glittery", "drive"],
+    "accent": { "from": "#38bdf8", "to": "#6366f1" }
+  },
+  {
+    "id": "al-bluehour",
+    "title": "Blue Hour",
+    "artistId": "a-koto",
+    "year": 2020,
+    "mood": ["smooth", "midnight"],
+    "accent": { "from": "#fb7185", "to": "#f59e0b" }
+  },
+  {
+    "id": "al-latenight",
+    "title": "Late Night Sessions",
+    "artistId": "a-koto",
+    "year": 2018,
+    "mood": ["improv", "intimate"],
+    "accent": { "from": "#f472b6", "to": "#fb923c" }
+  },
+  {
+    "id": "al-slowbloom",
+    "title": "Slow Bloom",
+    "artistId": "a-veiltone",
+    "year": 2023,
+    "mood": ["hazy", "reverb"],
+    "accent": { "from": "#f0abfc", "to": "#6366f1" }
+  },
+  {
+    "id": "al-glimmerwash",
+    "title": "Glimmerwash",
+    "artistId": "a-veiltone",
+    "year": 2021,
+    "mood": ["shoegaze", "dreamy"],
+    "accent": { "from": "#e9a5f1", "to": "#7c3aed" }
+  },
+  {
+    "id": "al-cassettedays",
+    "title": "Cassette Days",
+    "artistId": "a-tapebloom",
+    "year": 2024,
+    "mood": ["chill", "study"],
+    "accent": { "from": "#34d399", "to": "#0d9488" }
+  },
+  {
+    "id": "al-rainypages",
+    "title": "Rainy Pages",
+    "artistId": "a-tapebloom",
+    "year": 2022,
+    "mood": ["mellow", "rainy"],
+    "accent": { "from": "#2dd4bf", "to": "#0f766e" }
+  }
+]
