@@ -1,0 +1,189 @@
+<puzzle-view>
+  {#if artist}
+    <!-- Spotify-style accent header glow: the artist's accent.from at ~30% alpha
+         (headerGlow, computed in data()) fading into the page bg. Behind all
+         content (-z-10, pointer-events-none), anchored to the layout's `relative
+         isolate` scroll container (this root is unpositioned) so it spans the
+         main area edge to edge from the very top. -->
+    <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80" style="background:linear-gradient(to bottom, { headerGlow }, transparent)"></div>
+    <header class="mb-9">
+      <div class="flex items-end gap-5">
+        <div data-puzzle-morph-target="artist-{ artist.id }" class="w-28 h-28 sm:w-40 sm:h-40 rounded-full shrink-0 flex items-center justify-center ring-1 ring-white/10 shadow-xl shadow-black/40" style="background:{ artist.artwork }">
+          <span class="font-display text-4xl font-bold text-white/90 drop-shadow">{ artist.initials }</span>
+        </div>
+        <div class="min-w-0 pb-1">
+          <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted mb-1">{ artist.genre }</div>
+          <h1 class="font-display text-4xl sm:text-5xl font-bold text-fg leading-none">{ artist.name }</h1>
+          <p class="text-muted mt-3">{ artist.monthlyListeners | compact } monthly listeners</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mt-6">
+        <Button @press={ playArtist(event) }><Icon name="play" size={ 16 } /> Play</Button>
+        <!-- Plain <button> (NOT the Button component) so the morph attribute sits
+             on the REAL rendered element the router pairs. Shares its
+             data-puzzle-morph value with the /artist/:id/info dialog shell, so
+             pushing that route grows this button into the dialog and flies it back
+             on close (D55). No dynamic style={} binding here (morph rule). -->
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all bg-transparent text-fg border border-hairline hover:border-fg/40 hover:scale-[1.03] active:scale-95"
+          data-puzzle-morph="artist-info-{ artist.id }"
+          aria-haspopup="dialog"
+          @click={ openInfo(event) }>
+          <Icon name="info" size={ 16 } /> Info
+        </button>
+      </div>
+
+      <p class="text-muted max-w-2xl mt-6 leading-relaxed">{ artist.bio }</p>
+    </header>
+
+    <section class="mb-10">
+      <h2 class="font-display text-xl font-bold text-fg mb-3">Popular</h2>
+      <div class="flex flex-col">
+        {#for track in popular, i}
+          <TrackRow
+            track={ track }
+            position={ i + 1 }
+            current={ track.id === currentTrackId }
+            playing={ track.id === currentTrackId && isPlaying }
+            @play={ playTrack(track) }
+            @like={ likeTrack(track) } />
+        {/for}
+      </div>
+    </section>
+
+    <section>
+      <h2 class="font-display text-xl font-bold text-fg mb-4">Albums</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+        {#for album in albums, i}
+          <AlbumCard album={ album } artistName={ artist.name } index={ i } />
+        {/for}
+      </div>
+    </section>
+  {:else}
+    <!-- The store is fully seeded before the first data() (beforeMount), so
+         reaching here means the id genuinely has no artist — a real not-found. -->
+    <div class="py-24 text-center">
+      <h1 class="text-xl text-fg mb-2">Artist not found</h1>
+      <p class="text-muted">No artist with that id. <a href="#/" class="text-accent">Back to your library</a>.</p>
+    </div>
+  {/if}
+
+  <!-- The artist route's matched child renders here (v1.3 nested routes, D30):
+       ArtistIndexChild (empty) at /artist/:id, or ArtistInfoDialog at
+       /artist/:id/info. This view stays mounted across that swap, so the Info
+       button survives for the router to morph into the dialog and back (D55). -->
+  <Slot/>
+</puzzle-view>
+
+<!-- Loading template (SPEC §16, D39). Because this routed view declares a
+     skeleton, navigation commits immediately and this renders while the async
+     data() resolves — mirroring the real header (big circle + text
+     bars) and 5 popular-track rows so there's no layout jump on swap. Static
+     markup only: data() hasn't resolved, so only created()-seeded state would
+     be readable here (there is none). -->
+<puzzle-skeleton>
+  <div class="animate-pulse">
+    <header class="mb-9">
+      <div class="flex items-end gap-5">
+        <div class="w-28 h-28 sm:w-40 sm:h-40 rounded-full shrink-0 bg-surface-2"></div>
+        <div class="min-w-0 pb-1 flex-1">
+          <div class="h-3 w-20 rounded bg-surface-2 mb-3"></div>
+          <div class="h-10 w-64 max-w-full rounded-lg bg-elevated mb-3"></div>
+          <div class="h-3 w-40 rounded bg-surface-2"></div>
+        </div>
+      </div>
+    </header>
+    <div class="h-5 w-24 rounded bg-surface-2 mb-4"></div>
+    <div class="flex flex-col gap-2">
+      {#for 1...5}
+        <div class="h-12 rounded-lg bg-surface-2"></div>
+      {/for}
+    </div>
+  </div>
+</puzzle-skeleton>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import Button from '../components/Button.pzl';
+import TrackRow from '../components/TrackRow.pzl';
+import AlbumCard from '../components/AlbumCard.pzl';
+import Icon from '../components/Icon.pzl';
+
+export default class ArtistView extends PuzzleView {
+  // Async data() (SPEC §16, D39): the <puzzle-skeleton> above shows while this
+  // resolves, then the real content patches in. The store is fully seeded in
+  // beforeMount, so an absent artist is a genuine not-found, not a mid-load blank.
+  async data(params, props) {
+    const store = this.ctx.store;
+    const artist = store.findOne('artist', params.id);
+    const albums = store
+      .findMany('album', { filter: (al) => al.artistId === params.id })
+      .sort((a, b) => (b.year || 0) - (a.year || 0));
+    const popular = store
+      .findMany('track', { filter: (t) => t.artistId === params.id })
+      .sort((a, b) => b.plays - a.plays)
+      .slice(0, 5);
+    const player = store.findMany('player')[0] || null;
+
+    return {
+      artist,
+      albums,
+      popular,
+      // Header glow color: accent.from + '4d' (8-digit hex ≈ 30% alpha).
+      headerGlow: artist && artist.accent ? (artist.accent.from || '#3a3a44') + '4d' : '',
+      currentTrackId: player ? player.currentTrackId : '',
+      isPlaying: player ? player.isPlaying : false
+    };
+  }
+
+  events = {
+    playArtist: () => {
+      const player = this._player();
+      const ids = this._orderedIds();
+      if (player && ids.length) player.play(ids[0], ids);
+    },
+    // Navigate to the overlay child route — the router morphs the Info button
+    // into the dialog shell (they share a data-puzzle-morph value, D55).
+    openInfo: () => {
+      this.ctx.router.push('/artist/' + this.getData().artist.id + '/info');
+    },
+    playTrack: (track) => {
+      const player = this._player();
+      if (player) player.play(track.id, this._orderedIds());
+    },
+    likeTrack: (track) => track.toggleLike()
+  };
+
+  _player() {
+    return this.ctx.store.findMany('player')[0] || null;
+  }
+
+  // The artist's whole catalogue as an ordered id list (newest album first, then
+  // track order) — the queue when you press play anywhere on this page.
+  _orderedIds() {
+    const store = this.ctx.store;
+    const id = this.params.id;
+    const albums = store
+      .findMany('album', { filter: (al) => al.artistId === id })
+      .sort((a, b) => (b.year || 0) - (a.year || 0));
+    const ids = [];
+    albums.forEach((al) => {
+      store
+        .findMany('track', { filter: (t) => t.albumId === al.id })
+        .sort((a, b) => a.trackNo - b.trackNo)
+        .forEach((t) => ids.push(t.id));
+    });
+    return ids;
+  }
+
+  animations = {
+    // in is OPACITY-ONLY (no translateY): the router morph engine measures the header
+    // avatar's rect once at flight start, so a transform-based entrance would slide
+    // the real avatar away from where the blob lands (same rule as Album.pzl).
+    in:  { from: { opacity: 0 }, to: { opacity: 1 }, duration: 260, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
+  };
+}
+</scripts>

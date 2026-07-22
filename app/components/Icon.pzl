@@ -1,0 +1,107 @@
+<puzzle-view>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    width={ size }
+    height={ size }
+    aria-hidden="true">
+    <!-- Deliberate framework showcase: one {#case} block (v1.7, D37) picks the
+         glyph by name, evaluating `name` once and matching with strict ===.
+         Lucide-style 24px geometry, hand-inlined so the icon set has zero deps.
+         Solid glyphs (play/pause/heart-filled) override fill on their shapes. -->
+    {#case name}
+      {:when 'play'}
+        <polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none" />
+      {:when 'pause'}
+        <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
+        <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
+      {:when 'prev'}
+        <polygon points="19 20 9 12 19 4 19 20" />
+        <line x1="5" y1="19" x2="5" y2="5" />
+      {:when 'next'}
+        <polygon points="5 4 15 12 5 20 5 4" />
+        <line x1="19" y1="5" x2="19" y2="19" />
+      {:when 'shuffle'}
+        <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22" />
+        <path d="m18 2 4 4-4 4" />
+        <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
+        <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" />
+        <path d="m18 14 4 4-4 4" />
+      {:when 'repeat'}
+        <path d="m17 2 4 4-4 4" />
+        <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+        <path d="m7 22-4-4 4-4" />
+        <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+      {:when 'repeat-one'}
+        <path d="m17 2 4 4-4 4" />
+        <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+        <path d="m7 22-4-4 4-4" />
+        <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+        <path d="M11 10h1v4" />
+      {:when 'heart'}
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      {:when 'heart-filled'}
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="currentColor" stroke="none" />
+      {:when 'queue'}
+        <line x1="8" y1="6" x2="21" y2="6" />
+        <line x1="8" y1="12" x2="21" y2="12" />
+        <line x1="8" y1="18" x2="21" y2="18" />
+        <line x1="3" y1="6" x2="3.01" y2="6" />
+        <line x1="3" y1="12" x2="3.01" y2="12" />
+        <line x1="3" y1="18" x2="3.01" y2="18" />
+      {:when 'home'}
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      {:when 'search'}
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      {:when 'info'}
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4" />
+        <path d="M12 8h.01" />
+      {:when 'chevron-down'}
+        <path d="m6 9 6 6 6-6" />
+      {:when 'close'}
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      {:when 'plus'}
+        <path d="M5 12h14" />
+        <path d="M12 5v14" />
+      {:when 'dots'}
+        <circle cx="12" cy="12" r="1" fill="currentColor" />
+        <circle cx="19" cy="12" r="1" fill="currentColor" />
+        <circle cx="5" cy="12" r="1" fill="currentColor" />
+      {:when 'volume'}
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      {:when 'volume-mute'}
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none" />
+        <line x1="22" y1="9" x2="16" y2="15" />
+        <line x1="16" y1="9" x2="22" y2="15" />
+      {:when 'note'}
+        <path d="M9 18V5l12-2v13" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
+    {/case}
+  </svg>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+
+// Reusable inline-SVG icon (component mode renders inline — no wrapper, single
+// <svg> root, D20). `name` selects the glyph; `size` sets width/height (px).
+export default class Icon extends PuzzleView {
+  data(params, props) {
+    return {
+      name: props.name,
+      size: props.size || 20
+    };
+  }
+}
+</scripts>

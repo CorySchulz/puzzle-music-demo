@@ -1,0 +1,137 @@
+<puzzle-view>
+  <!-- sm+: a 3-column grid — fluid left/right flanks, center capped at 36rem —
+       so the transport sits dead-center of the SCREEN and the volume cluster
+       hugs the right edge at any width. Below sm it stays a simple flex row. -->
+  <div class="shrink-0 border-t border-line bg-surface h-20 px-3 sm:px-4 flex items-center gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,36rem)_minmax(0,1fr)] sm:gap-4">
+    {#if track}
+      <button class="flex items-center gap-3 min-w-0 flex-1 sm:flex-none text-left hover:no-underline" title="Open now playing" @click={ openPlayer(event) }>
+        <div class="w-12 h-12 rounded-md shrink-0 shadow ring-1 ring-white/10" style="background:{ artwork }"></div>
+        <div class="min-w-0">
+          <div class="truncate text-sm font-semibold text-fg">{ track.title }</div>
+          <div class="truncate text-xs text-muted">{ artistName }</div>
+        </div>
+      </button>
+
+      <div class="flex-1 sm:flex-none sm:w-full flex flex-col items-center gap-1.5 max-w-xl">
+        <div class="flex items-center gap-4">
+          <button class="transition-colors {#if shuffle}text-accent hover:text-accent-2{:else}text-muted hover:text-fg{/if}" title="Shuffle" aria-label="Shuffle" @click={ toggleShuffle(event) }><Icon name="shuffle" size={ 16 } /></button>
+          <button class="text-muted hover:text-fg transition-colors" title="Previous" aria-label="Previous" @click={ prev(event) }><Icon name="prev" size={ 18 } /></button>
+          <button class="w-9 h-9 rounded-full bg-fg text-bg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform" title="Play / pause" aria-label="Play / pause" @click={ toggle(event) }>
+            {#if isPlaying}<Icon name="pause" size={ 18 } />{:else}<span class="translate-x-px flex"><Icon name="play" size={ 18 } /></span>{/if}
+          </button>
+          <button class="text-muted hover:text-fg transition-colors" title="Next" aria-label="Next" @click={ next(event) }><Icon name="next" size={ 18 } /></button>
+          <button class="transition-colors {#if repeat !== 'off'}text-accent hover:text-accent-2{:else}text-muted hover:text-fg{/if}" title="Repeat" aria-label="Repeat" @click={ cycleRepeat(event) }>
+            {#case repeat}
+              {:when 'one'}<Icon name="repeat-one" size={ 16 } />
+              {:else}<Icon name="repeat" size={ 16 } />
+            {/case}
+          </button>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 w-full">
+          <span class="text-[11px] tabular-nums text-faint w-9 text-right">{ progressSec | duration }</span>
+          <div class="flex-1 h-1 rounded-full bg-elevated overflow-hidden cursor-pointer" title="Seek" @click={ seek(event) }>
+            <div class="h-full rounded-full bg-fg" style="width:{ progressPct }%"></div>
+          </div>
+          <span class="text-[11px] tabular-nums text-faint w-9">{ durationSec | duration }</span>
+        </div>
+      </div>
+
+      <div class="hidden sm:flex items-center gap-4 justify-self-end">
+        <span class="text-accent"><EqualizerBars playing={ isPlaying } /></span>
+        <div class="flex items-center gap-1.5">
+          <button class="text-muted hover:text-fg transition-colors" title="Mute" aria-label="Mute" @click={ toggleMute(event) }>
+            {#if volume === 0}<Icon name="volume-mute" size={ 18 } />{:else}<Icon name="volume" size={ 18 } />{/if}
+          </button>
+          <input type="range" min="0" max="1" step="0.01" class="w-24" title="Volume" aria-label="Volume" value={ volume } @input={ setVolume(event) } />
+        </div>
+        <button class="text-muted hover:text-fg transition-colors" title="Queue" aria-label="Queue" data-morph-trigger="queue" @click={ openQueue(event) }><Icon name="queue" size={ 20 } /></button>
+      </div>
+    {:else}
+      <div class="flex-1 sm:col-span-3 text-center text-sm text-muted">Pick a track to start playing ♪</div>
+    {/if}
+  </div>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import EqualizerBars from './EqualizerBars.pzl';
+import Icon from './Icon.pzl';
+
+// The persistent playback bar. It reads the single player record (via
+// findMany('player') so it subscribes to the type — the record is created at
+// boot and this stays live through it) and, while mounted, owns the 1-second
+// tick that advances progress and auto-advances at track end. On a layout swap
+// to the full-screen player this unmounts (timer cleared) and NowPlaying takes
+// over the tick; progress is unbroken because it lives in the store record.
+export default class MiniPlayer extends PuzzleView {
+  data(params, props) {
+    const store = this.ctx.store;
+    const player = store.findMany('player')[0] || null;
+    const track = player && player.currentTrackId ? store.findOne('track', player.currentTrackId) : null;
+    const album = track ? store.findOne('album', track.albumId) : null;
+    const artist = track ? store.findOne('artist', track.artistId) : null;
+    const progressSec = player ? player.progressSec : 0;
+    const durationSec = track ? track.durationSec : 0;
+    return {
+      track,
+      artwork: album ? album.artwork : 'linear-gradient(135deg,#3a3a44,#22222a)',
+      artistName: artist ? artist.name : '',
+      isPlaying: player ? player.isPlaying : false,
+      volume: player ? player.volume : 0.8,
+      shuffle: player ? player.shuffle : false,
+      repeat: player ? player.repeat : 'off',
+      progressSec,
+      durationSec,
+      progressPct: durationSec ? Math.min(100, (progressSec / durationSec) * 100) : 0
+    };
+  }
+
+  events = {
+    openPlayer: () => { this.ctx.router.push('/now-playing'); },
+    toggle: () => { this._player()?.toggle(); },
+    next:   () => { this._player()?.next(); },
+    prev:   () => { this._player()?.prev(); },
+    toggleShuffle: () => { this._player()?.toggleShuffle(); },
+    cycleRepeat:   () => { this._player()?.cycleRepeat(); },
+    toggleMute:    () => { this._player()?.toggleMute(); },
+    // Range input hands us a string in event.target.value; the model clamps it.
+    setVolume: (event) => { this._player()?.setVolume(event.target.value); },
+    // Click-to-seek: map the click's x within the bar to a position (as §5's
+    // NowPlaying.seek does), then seekTo on the player.
+    seek: (event) => {
+      const player = this._player();
+      const { durationSec } = this.getData();
+      if (!player || !durationSec) return;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const pct = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      player.seekTo(pct * durationSec);
+    },
+    openQueue: () => { if (typeof this.props.toggleQueue === 'function') this.props.toggleQueue(); }
+  };
+
+  _player() {
+    return this.ctx.store.findMany('player')[0] || null;
+  }
+
+  mounted() {
+    this._timer = setInterval(() => this._tick(), 1000);
+  }
+
+  destroyed() {
+    if (this._timer) clearInterval(this._timer);
+    this._timer = null;
+  }
+
+  _tick() {
+    const player = this._player();
+    if (!player || !player.isPlaying || !player.currentTrackId) return;
+    const track = this.ctx.store.findOne('track', player.currentTrackId);
+    if (!track) return;
+    if (player.progressSec + 1 >= track.durationSec) {
+      player.advance(); // auto-advance: repeat/shuffle rules live in the model
+    } else {
+      player.update({ progressSec: player.progressSec + 1 });
+    }
+  }
+}
+</scripts>

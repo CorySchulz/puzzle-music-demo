@@ -1,0 +1,162 @@
+<puzzle-view class="h-full flex flex-col items-center justify-center px-6 pb-10">
+  {#if track}
+    <!-- Spotify-style accent glow from the current album's accent.from (~30%
+         alpha, headerGlow computed in data()), pooled behind the artwork at the
+         top of the full-screen player. Behind all content (-z-10,
+         pointer-events-none). The view root is intentionally NOT positioned:
+         the glow anchors to the layout's `relative isolate` scroll container,
+         so it spans it edge to edge and starts at the very top — the content
+         padding sits INSIDE the gradient. -->
+    <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80" style="background:linear-gradient(to bottom, { headerGlow }, transparent)"></div>
+    <div class="w-full max-w-md flex flex-col items-center">
+      <div class="w-full aspect-square rounded-3xl mb-8 ring-1 ring-white/10 shadow-2xl shadow-black/60" style="background:{ artwork }"></div>
+
+      <div class="w-full flex items-start justify-between gap-4 mb-6">
+        <div class="min-w-0">
+          <h1 class="font-display text-2xl font-bold text-fg truncate">{ track.title }</h1>
+          <a href="#/artist/{ track.artistId }" class="text-muted hover:text-fg hover:no-underline">{ artistName }</a>
+        </div>
+        <button
+          class="shrink-0 transition-colors {#if track.liked}text-accent{:else}text-faint hover:text-fg{/if}"
+          title="Like"
+          aria-label="Like"
+          @click={ like(event) }>{#if track.liked}<Icon name="heart-filled" size={ 22 } />{:else}<Icon name="heart" size={ 22 } />{/if}</button>
+      </div>
+
+      <div class="w-full">
+        <div class="h-1.5 rounded-full bg-elevated overflow-hidden cursor-pointer" title="Seek" @click={ seek(event) }>
+          <div class="h-full rounded-full bg-accent" style="width:{ progressPct }%"></div>
+        </div>
+        <div class="flex justify-between mt-1.5 text-[11px] tabular-nums text-faint">
+          <span>{ progressSec | duration }</span>
+          <span>{ durationSec | duration }</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6 mt-8">
+        <button class="transition-colors {#if shuffle}text-accent hover:text-accent-2{:else}text-muted hover:text-fg{/if}" title="Shuffle" aria-label="Shuffle" @click={ toggleShuffle(event) }><Icon name="shuffle" size={ 18 } /></button>
+        <button class="text-muted hover:text-fg transition-colors" title="Previous" aria-label="Previous" @click={ prev(event) }><Icon name="prev" size={ 22 } /></button>
+        <button
+          class="w-16 h-16 rounded-full bg-fg text-bg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          title="Play / pause"
+          aria-label="Play / pause"
+          @click={ toggle(event) }>{#if isPlaying}<Icon name="pause" size={ 24 } />{:else}<span class="translate-x-0.5 flex"><Icon name="play" size={ 24 } /></span>{/if}</button>
+        <button class="text-muted hover:text-fg transition-colors" title="Next" aria-label="Next" @click={ next(event) }><Icon name="next" size={ 22 } /></button>
+        <button class="transition-colors {#if repeat !== 'off'}text-accent hover:text-accent-2{:else}text-muted hover:text-fg{/if}" title="Repeat" aria-label="Repeat" @click={ cycleRepeat(event) }>
+          {#case repeat}
+            {:when 'one'}<Icon name="repeat-one" size={ 18 } />
+            {:else}<Icon name="repeat" size={ 18 } />
+          {/case}
+        </button>
+      </div>
+
+      <div class="w-full max-w-[240px] mx-auto flex items-center gap-3 mt-6">
+        <button class="shrink-0 text-muted hover:text-fg transition-colors" title="Mute" aria-label="Mute" @click={ toggleMute(event) }>
+          {#if volume === 0}<Icon name="volume-mute" size={ 18 } />{:else}<Icon name="volume" size={ 18 } />{/if}
+        </button>
+        <input type="range" min="0" max="1" step="0.01" class="flex-1" title="Volume" aria-label="Volume" value={ volume } @input={ setVolume(event) } />
+      </div>
+
+      <div class="mt-9 text-accent"><EqualizerBars playing={ isPlaying } /></div>
+    </div>
+  {:else}
+    <div class="text-center text-muted">
+      <p class="mb-4">Nothing is playing right now.</p>
+      <a href="#/" class="text-accent hover:no-underline">Go find something ♪</a>
+    </div>
+  {/if}
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import EqualizerBars from '../components/EqualizerBars.pzl';
+import Icon from '../components/Icon.pzl';
+
+// Full-screen player. No `animations` field: it rides PlayerLayout's swap
+// (one animator per transition, SPEC §12). It owns the playback tick while
+// visible — started in viewDidShow(), stopped in viewWillHide() — which is why
+// those lifecycle hooks exist. The MiniPlayer owns the tick everywhere else;
+// only one is ever mounted, so the clock never double-counts.
+export default class NowPlayingView extends PuzzleView {
+  data(params, props) {
+    const store = this.ctx.store;
+    const player = store.findMany('player')[0] || null;
+    const track = player && player.currentTrackId ? store.findOne('track', player.currentTrackId) : null;
+    const album = track ? store.findOne('album', track.albumId) : null;
+    const artist = track ? store.findOne('artist', track.artistId) : null;
+    const progressSec = player ? player.progressSec : 0;
+    const durationSec = track ? track.durationSec : 0;
+    return {
+      track,
+      artwork: album ? album.artwork : 'linear-gradient(135deg,#3a3a44,#22222a)',
+      // Header glow color: current album's accent.from + '4d' (≈ 30% alpha).
+      headerGlow: album && album.accent ? (album.accent.from || '#3a3a44') + '4d' : '',
+      artistName: artist ? artist.name : '',
+      isPlaying: player ? player.isPlaying : false,
+      volume: player ? player.volume : 0.8,
+      shuffle: player ? player.shuffle : false,
+      repeat: player ? player.repeat : 'off',
+      progressSec,
+      durationSec,
+      progressPct: durationSec ? Math.min(100, (progressSec / durationSec) * 100) : 0
+    };
+  }
+
+  events = {
+    toggle: () => { this._player()?.toggle(); },
+    next:   () => { this._player()?.next(); },
+    prev:   () => { this._player()?.prev(); },
+    toggleShuffle: () => { this._player()?.toggleShuffle(); },
+    cycleRepeat:   () => { this._player()?.cycleRepeat(); },
+    toggleMute:    () => { this._player()?.toggleMute(); },
+    // Range input hands us a string in event.target.value; the model clamps it.
+    setVolume: (event) => { this._player()?.setVolume(event.target.value); },
+    like:   () => {
+      const t = this.getData().track;
+      if (t) t.toggleLike();
+    },
+    seek: (event) => {
+      const player = this._player();
+      const { durationSec } = this.getData();
+      if (!player || !durationSec) return;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const pct = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      player.seekTo(pct * durationSec);
+    }
+  };
+
+  _player() {
+    return this.ctx.store.findMany('player')[0] || null;
+  }
+
+  // Lifecycle hooks (v1.1): own the tick only while this view is on screen.
+  viewDidShow() {
+    this._timer = setInterval(() => this._tick(), 1000);
+  }
+
+  viewWillHide() {
+    this._stopTick();
+  }
+
+  destroyed() {
+    this._stopTick();
+  }
+
+  _stopTick() {
+    if (this._timer) clearInterval(this._timer);
+    this._timer = null;
+  }
+
+  _tick() {
+    const player = this._player();
+    if (!player || !player.isPlaying || !player.currentTrackId) return;
+    const track = this.ctx.store.findOne('track', player.currentTrackId);
+    if (!track) return;
+    if (player.progressSec + 1 >= track.durationSec) {
+      player.advance(); // auto-advance: repeat/shuffle rules live in the model
+    } else {
+      player.update({ progressSec: player.progressSec + 1 });
+    }
+  }
+}
+</scripts>

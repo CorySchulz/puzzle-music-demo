@@ -1,0 +1,202 @@
+<puzzle-view class="h-screen flex flex-col bg-bg text-fg overflow-hidden">
+  <div class="flex-1 flex min-h-0">
+    <!-- Sidebar. Stays mounted across Library/Artist/Album/Search navigations
+         because they all reuse this layout — only <Slot/> swaps. -->
+    <aside class="hidden sm:flex w-60 shrink-0 flex-col bg-surface border-r border-line p-3">
+      <a href="#/" class="flex items-center gap-2.5 px-3 py-3 mb-4 font-display text-lg font-bold text-fg hover:no-underline">
+        <span class="inline-block w-7 h-7 rounded-lg" style="background:linear-gradient(135deg,#7c5cff,#22d3ee)"></span>
+        Puzzle Sounds
+      </a>
+
+      <a href="#/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors hover:no-underline hover:text-fg {#if section === 'library'}text-fg bg-surface-2{:else}text-muted{/if}">
+        <Icon name="home" size={ 18 } /> Home
+      </a>
+      <a href="#/search" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors hover:no-underline hover:text-fg {#if section === 'search'}text-fg bg-surface-2{:else}text-muted{/if}">
+        <Icon name="search" size={ 18 } /> Search
+      </a>
+
+      <div class="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">Library</div>
+      {#for artist in artists, i}
+        <a href="#/artist/{ artist.id }" class="px-3 py-2 rounded-lg text-sm text-muted hover:text-fg hover:no-underline hover:bg-surface-2 transition-colors">{ artist.name }</a>
+      {/for}
+
+      <div class="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">Playlists</div>
+
+      <!-- Pinned Liked Songs — always first. -->
+      <a href="#/liked" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted hover:text-fg hover:no-underline hover:bg-surface-2 transition-colors">
+        <span class="inline-flex items-center justify-center w-6 h-6 rounded shrink-0 text-white/90" style="background:linear-gradient(135deg,#7c5cff,#c86dd7)"><Icon name="heart-filled" size={ 12 } /></span>
+        Liked Songs
+      </a>
+
+      <!-- User playlists from the store, sorted by `order`. findMany subscribes
+           this layout, so creating a playlist below makes it appear instantly. -->
+      {#for p in playlists, i}
+        <a href="#/playlist/{ p.id }" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted hover:text-fg hover:no-underline hover:bg-surface-2 transition-colors">
+          <span class="inline-block w-6 h-6 rounded shrink-0" style="background:{ p.artwork }"></span>
+          <span class="truncate">{ p.name }</span>
+        </a>
+      {/for}
+
+      <button @click={ newPlaylist(event) } class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted hover:text-fg hover:bg-surface-2 transition-colors text-left w-full">
+        <span class="inline-flex items-center justify-center w-6 h-6 rounded shrink-0 border border-hairline"><Icon name="plus" size={ 14 } /></span>
+        New playlist
+      </button>
+    </aside>
+
+    <!-- Routed view renders here. `relative isolate` makes this scroll container
+         the positioning context for the views' header-glow gradients: they anchor
+         to inset-x-0 top-0 HERE, so the glow runs edge to edge of the main area,
+         starts at the very top (the container's padding sits inside it), and
+         scrolls away with the content. -->
+    <main class="flex-1 min-h-0 overflow-y-auto relative isolate">
+      <div class="max-w-5xl mx-auto px-5 sm:px-8 py-8">
+        <Slot/>
+      </div>
+    </main>
+  </div>
+
+  <!-- Persistent playback bar — keeps ticking as views swap above it. -->
+  <MiniPlayer @toggleQueue={ toggleQueue(event) } />
+
+  <!-- Mobile nav. The sidebar is desktop-only (hidden below sm), so on small
+       screens navigation moves to a bottom tab bar under the player — same
+       active-section highlight, driven by the same computed `section`. -->
+  <nav class="sm:hidden shrink-0 flex border-t border-line bg-surface">
+    <a href="#/" class="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors hover:no-underline {#if section === 'library'}text-fg{:else}text-muted{/if}">
+      <Icon name="home" size={ 22 } />
+      Home
+    </a>
+    <a href="#/search" class="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors hover:no-underline {#if section === 'search'}text-fg{:else}text-muted{/if}">
+      <Icon name="search" size={ 22 } />
+      Search
+    </a>
+  </nav>
+
+  <!-- Always mounted: `queueOpen` flows in as the `open` prop, and the dialog
+       drives its own morph in/out on the flip. Keeping it mounted lets the
+       MorphEngine measure the closed dialog and reverse the blob on close. -->
+  <QueueDialog open={ queueOpen } @close={ closeQueue(event) } />
+
+  <!-- Global toast surface — always mounted (outside the queue conditional) so a
+       show() from any view flashes the pill above the MiniPlayer. -->
+  <Toast />
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import MiniPlayer from '../components/MiniPlayer.pzl';
+import QueueDialog from '../components/QueueDialog.pzl';
+import Toast from '../components/Toast.pzl';
+import Icon from '../components/Icon.pzl';
+
+export default class AppLayout extends PuzzleView {
+  created() {
+    this.setData({ queueOpen: false });
+  }
+
+  // data() re-runs on every navigation that reuses this layout (SPEC §9), so the
+  // active-nav highlight recomputes from the current route without extra wiring.
+  // We read this.route (v1.15, D47) — the per-navigation route snapshot — which
+  // is correct inside the pre-commit gate AND in hash mode (D34), unlike
+  // window.location.pathname (a fixed app path in hash mode) or router.current
+  // (a navigation behind pre-commit). Routed layouts always receive this.route
+  // (seeded via preload even on a fresh mount / return from PlayerLayout), so no
+  // null guard is needed; we key the section off the TOP-LEVEL route name
+  // (chain[0]), not the leaf: the artist route now nests children (D30), so its
+  // leaf is 'artist-index' / 'artist-info' while the section it belongs to is
+  // still 'artist'. chain[0].name is 'artist' for both — flat routes are a
+  // one-element chain, so every other comparison is unchanged.
+  data(params, props) {
+    const name = this.route.chain[0].name;
+    const section =
+      name === 'library' ||
+      name === 'artist' ||
+      name === 'album' ||
+      name === 'liked' ||
+      name === 'playlist'
+        ? 'library'
+        : name === 'search'
+          ? 'search'
+          : '';
+    // Sidebar "Library" links derived from the store (sorted by name) rather than
+    // hardcoded, so the list tracks the seeded data.
+    const artists = this.ctx.store
+      .findMany('artist')
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+    // Playlists from the store, sorted by their `order` field.
+    const playlists = this.ctx.store
+      .findMany('playlist')
+      .slice()
+      .sort((a, b) => a.order - b.order);
+    return { queueOpen: this.getData().queueOpen, section, artists, playlists };
+  }
+
+  events = {
+    toggleQueue: () => {
+      this.setData('queueOpen', !this.getData().queueOpen);
+      this.refresh();
+    },
+    closeQueue: () => {
+      this.setData('queueOpen', false);
+      this.refresh();
+    },
+    // Create a fresh empty playlist and navigate to it — the user lands on the
+    // new page and renames it inline. createRecord notifies subscribers, so the
+    // sidebar list above updates immediately.
+    newPlaylist: () => {
+      const store = this.ctx.store;
+      const orders = store.findMany('playlist').map((p) => p.order);
+      const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
+      const id = 'pl-' + Date.now().toString(36);
+      store.createRecord('playlist', {
+        id,
+        name: 'My Playlist',
+        trackIds: [],
+        accent: { from: '#7c5cff', to: '#a855f7' },
+        order: nextOrder,
+      });
+      this.ctx.router.push('/playlist/' + id); // path-shaped (hash mode encodes it)
+    },
+  };
+
+  // Window-level keyboard shortcuts. Unlike the per-element @event:modifier
+  // bindings (D38), these must work regardless of what's focused — a GLOBAL
+  // concern — so they live as a document listener on the persistent layout,
+  // added in mounted() and torn down in destroyed(). Space toggles play/pause
+  // (preventDefault so the page doesn't scroll), ←/→ skip. Ignored while typing
+  // (input/textarea/select/contenteditable) and when a modifier is held (so
+  // browser shortcuts like ⌘← keep working).
+  _onKeydown = (event) => {
+    const t = event.target;
+    const tag = t && t.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    const player = this.ctx.store.findMany('player')[0];
+    if (!player) return;
+    if (event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      player.toggle();
+    } else if (event.key === 'ArrowLeft') {
+      player.prev();
+    } else if (event.key === 'ArrowRight') {
+      player.next();
+    }
+  };
+
+  mounted() {
+    document.addEventListener('keydown', this._onKeydown);
+  }
+
+  destroyed() {
+    document.removeEventListener('keydown', this._onKeydown);
+  }
+
+  // Plays only on a LAYOUT swap (to/from PlayerLayout), not on view-only swaps
+  // within this layout (constellation/doc/DOC-SPEC.md §12).
+  animations = {
+    in:  { from: { opacity: 0, transform: 'scale(0.98)' }, to: { opacity: 1, transform: 'scale(1)' },    duration: 280, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'scale(1)' },    to: { opacity: 0, transform: 'scale(0.99)' }, duration: 180, easing: 'ease-in' }
+  };
+}
+</scripts>

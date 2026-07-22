@@ -1,0 +1,167 @@
+<puzzle-view class="contents">
+  <div class="fixed inset-0 z-40 flex items-center justify-center p-4 sm:p-8">
+    <button type="button" class="artist-info-backdrop absolute inset-0" aria-label="Close" @click={ close }></button>
+    <dialog class="artist-info-dialog relative flex w-full max-w-lg flex-col" open="open" data-puzzle-morph="artist-info-{ artistId }">
+      {#if artist}
+        <header class="flex items-start justify-between gap-4 px-7 pt-7">
+          <div class="flex items-center gap-4 min-w-0">
+            <!-- Style binding on the INNER avatar span, never on the <dialog>
+                 itself — the morph engine drives the shell's inline transform. -->
+            <div class="w-16 h-16 rounded-full shrink-0 flex items-center justify-center ring-1 ring-white/10 shadow-lg shadow-black/40" style="background:{ artist.artwork }">
+              <span class="font-display text-xl font-bold text-white/90 drop-shadow">{ artist.initials }</span>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted mb-1">{ artist.genre }</p>
+              <h2 class="font-display text-3xl font-bold text-fg leading-none truncate">{ artist.name }</h2>
+            </div>
+          </div>
+          <button type="button" class="artist-info-close" aria-label="Close" @click={ close }>✕</button>
+        </header>
+
+        <div class="flex items-center gap-8 px-7 pt-6">
+          <div>
+            <div class="font-display text-2xl font-bold text-fg tabular-nums">{ artist.followers | compact }</div>
+            <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint mt-0.5">Followers</div>
+          </div>
+          <div>
+            <div class="font-display text-2xl font-bold text-fg tabular-nums">{ artist.monthlyListeners | compact }</div>
+            <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint mt-0.5">Monthly listeners</div>
+          </div>
+        </div>
+
+        <div class="px-7 py-7">
+          <p class="text-sm leading-6 text-muted">{ artist.bio }</p>
+        </div>
+      {/if}
+    </dialog>
+  </div>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+
+// Routed overlay for an artist's details — the leaf child of the artist route
+// (path 'info'), rendered inside ArtistView's <Slot/> so the artist page (and the
+// Info button that opened it) stays mounted beneath it. There is ZERO morph code
+// in this view: the <dialog> shell shares its data-puzzle-morph value with the
+// button, and the router pairs them on the way in and out (D55) — including the
+// browser back button. Escape / backdrop / the ✕ button just navigate; the
+// reverse morph is awaited by the router before this view is destroyed.
+export default class ArtistInfoDialog extends PuzzleView {
+  created() {
+    this._onKey = (event) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      this._close();
+    };
+  }
+
+  // Looks the artist up (findOne) from the store, seeded in beforeMount. By the
+  // time you're on the artist page and open this, the seed has long resolved; on a
+  // deep link it renders plain (no morph).
+  async data(params) {
+    const artist = this.ctx.store.findOne('artist', params.id);
+    return {
+      artistId: params.id,
+      artist,
+    };
+  }
+
+  mounted() {
+    document.addEventListener('keydown', this._onKey);
+  }
+
+  // The morph flies the dialog back while this view is still mounted; fade the
+  // backdrop out alongside it. viewWillHide fires as the out phase starts —
+  // exactly when the reverse flight begins.
+  viewWillHide() {
+    const backdrop = this.element && this.element.querySelector('.artist-info-backdrop');
+    if (backdrop) backdrop.classList.add('is-leaving');
+  }
+
+  destroyed() {
+    document.removeEventListener('keydown', this._onKey);
+  }
+
+  // Navigate back to the parent index (predictable even on a deep link, where
+  // there's no history entry to pop) — the router pairs the reverse morph.
+  _close() {
+    this.ctx.router.push('/artist/' + this.getData().artistId);
+  }
+
+  events = {
+    close: () => this._close(),
+  };
+}
+</scripts>
+
+<styles>
+/* ---- artist info dialog (morph target, D55) ---------------------------------
+   Rules for morph elements: no transform-based positioning (the flex parent
+   centers it), no stylesheet opacity, no transitions/animation on the shell —
+   the engine drives inline transform/opacity during the reveal. The
+   radius/border/background/shadow DELTAS from the Info button are what the blob
+   visibly interpolates. */
+
+.artist-info-backdrop {
+  background: rgba(5, 5, 7, 0.62);
+  backdrop-filter: blur(2px);
+  animation: artist-info-backdrop-in 220ms ease-out both;
+  /* backdrop-filter must be transitioned explicitly — Chrome applies the blur at
+     full strength regardless of the element's opacity. */
+  transition:
+    opacity 420ms ease-out,
+    backdrop-filter 420ms ease-out;
+}
+
+/* Fade out WITH the reverse flight. `animation: none` is load-bearing: the
+   filling entrance animation otherwise outranks the transitioned opacity in the
+   cascade, and the backdrop would sit at full black until the view is destroyed. */
+.artist-info-backdrop.is-leaving {
+  animation: none;
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+/* A real <dialog> used NON-modally (static `open` attribute, no showModal):
+   showModal's top layer would paint above the router-driven morph blob and break
+   the reveal. Non-modal keeps it a normal box — semantics without the top layer.
+   The resets neutralize the UA dialog styles (margin/padding/border/bg). */
+.artist-info-dialog {
+  margin: 0;
+  padding: 0;
+  min-height: 18rem;
+  color: inherit;
+  border: 1px solid var(--color-hairline);
+  border-radius: 1.25rem;
+  background: var(--color-surface-2);
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.artist-info-close {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 9999px;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: color 160ms ease-out, border-color 160ms ease-out;
+}
+
+.artist-info-close:hover {
+  color: var(--color-fg);
+  border-color: var(--color-accent);
+}
+
+@keyframes artist-info-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+</styles>

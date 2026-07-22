@@ -1,0 +1,199 @@
+<puzzle-view>
+  <div class="group grid grid-cols-[2rem_1fr_auto] items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-surface-2 {#if current}bg-surface-2{/if}">
+    <button
+      class="w-8 h-8 -mx-0.5 flex items-center justify-center text-sm text-muted"
+      title="Play"
+      aria-label="Play"
+      @click={ play(event) }>
+      {#if current}
+        {#if playing}
+          <span class="text-accent"><EqualizerBars playing={ true } /></span>
+        {:else}
+          <span class="text-accent"><Icon name="play" size={ 16 } /></span>
+        {/if}
+      {:else}
+        <span class="tabular-nums group-hover:hidden">{ position }</span>
+        <span class="hidden group-hover:inline text-fg"><Icon name="play" size={ 16 } /></span>
+      {/if}
+    </button>
+
+    <div class="min-w-0">
+      <div class="truncate font-medium {#if current}text-accent{/if}{#if !current}text-fg{/if}">{ track.title }</div>
+      <div class="text-xs text-muted">{ track.plays | compact } plays</div>
+    </div>
+
+    <!-- `relative` so the context-menu popover can anchor to this cluster (the
+         grid's third column). The track lists have no overflow-hidden ancestor,
+         so an absolutely-positioned popover isn't clipped. -->
+    <div class="relative flex items-center gap-3">
+      <button
+        class="transition-all {#if track.liked}text-accent{:else}text-faint opacity-0 group-hover:opacity-100 hover:text-fg{/if}"
+        title="Like"
+        aria-label="Like"
+        @click={ like(event) }>
+        {#if track.liked}<Icon name="heart-filled" size={ 16 } />{:else}<Icon name="heart" size={ 16 } />{/if}
+      </button>
+      {#if removable}
+        <button
+          class="transition-all text-faint opacity-0 group-hover:opacity-100 hover:text-fg"
+          title="Remove from playlist"
+          aria-label="Remove from playlist"
+          @click={ remove(event) }>
+          <Icon name="close" size={ 14 } />
+        </button>
+      {/if}
+
+      <!-- Kebab: opens the per-track context menu. Same faint-until-group-hover
+           treatment as the like button; forced visible while the menu is open. -->
+      <button
+        class="transition-all hover:text-fg {#if menuOpen}opacity-100 text-fg{:else}text-faint opacity-0 group-hover:opacity-100{/if}"
+        title="More options"
+        aria-label="More options"
+        @click={ toggleMenu(event) }>
+        <Icon name="dots" size={ 16 } />
+      </button>
+
+      <span class="text-sm text-muted tabular-nums w-10 text-right">{ track.durationSec | duration }</span>
+
+      {#if menuOpen}
+        <!-- z-30 keeps the popover under the queue drawer (z-40). Playlists are
+             read live in data() so this list reflects create/delete instantly. -->
+        <div class="absolute right-0 top-full z-30 mt-1 min-w-48 py-1 rounded-xl bg-elevated ring-1 ring-hairline border border-line shadow-2xl shadow-black/50 text-sm">
+          <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors" @click={ menuPlayNext(event) }>Play next</button>
+          <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors" @click={ menuAddToQueue(event) }>Add to queue</button>
+          {#if playlists.length > 0}
+            <div class="border-t border-line my-1"></div>
+            {#for pl in playlists, i}
+              <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors truncate" @click={ menuAddToPlaylist(pl) }>Add to { pl.name }</button>
+            {/for}
+          {/if}
+          <div class="border-t border-line my-1"></div>
+          <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors" @click={ menuGoAlbum(event) }>Go to album</button>
+          <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors" @click={ menuGoArtist(event) }>Go to artist</button>
+        </div>
+      {/if}
+    </div>
+  </div>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import EqualizerBars from './EqualizerBars.pzl';
+import Icon from './Icon.pzl';
+
+// One track in a list. `current`/`playing` come from the parent's player
+// subscription; `play`/`like` are callback props the parent owns. It also owns a
+// self-contained context menu (kebab → Play next / Add to queue / add-to-playlist
+// / navigate) driven by a local `menuOpen` flag, plus the toast notifications
+// those actions fire.
+export default class TrackRow extends PuzzleView {
+  data(params, props) {
+    // Read playlists here (findMany subscribes this row) so the menu's
+    // add-to-playlist list stays live as playlists are created/deleted.
+    const playlists = this.ctx.store
+      .findMany('playlist')
+      .slice()
+      .sort((a, b) => a.order - b.order);
+    return {
+      track: props.track,
+      position: props.position ?? props.track.trackNo,
+      current: !!props.current,
+      playing: !!props.playing,
+      // Optional: playlist views pass removable + a `remove` callback. Absent
+      // everywhere else (Album/Artist/Search), so the button never renders there.
+      removable: !!props.removable,
+      playlists,
+      // Local UI flag (setData does not re-run data(), so read it back through
+      // getData — same pattern the layout uses for queueOpen).
+      menuOpen: this.getData().menuOpen || false
+    };
+  }
+
+  events = {
+    play: () => {
+      if (typeof this.props.play === 'function') this.props.play();
+    },
+    like: () => {
+      if (typeof this.props.like === 'function') this.props.like();
+    },
+    remove: () => {
+      if (typeof this.props.remove === 'function') this.props.remove();
+    },
+
+    // Toggle the context menu open/closed.
+    toggleMenu: () => {
+      this.setData('menuOpen', !this.getData().menuOpen);
+      this.refresh();
+    },
+
+    // Queue actions — each flashes a toast and closes the menu.
+    menuPlayNext: () => {
+      const player = this._player();
+      if (player) player.playNext(this.getData().track.id);
+      this._toast('Playing next');
+      this._closeMenu();
+    },
+    menuAddToQueue: () => {
+      const player = this._player();
+      if (player) player.addToQueue(this.getData().track.id);
+      this._toast('Added to queue');
+      this._closeMenu();
+    },
+    menuAddToPlaylist: (playlist) => {
+      // addTrack() de-dupes (models/playlist.js); toast confirms regardless.
+      playlist.addTrack(this.getData().track.id);
+      this._toast('Added to ' + playlist.name);
+      this._closeMenu();
+    },
+
+    // Navigation — path-shaped pushes (hash mode encodes them, D34). Close the
+    // menu BEFORE navigating: the push may tear this row's view down, and we
+    // don't want _closeMenu()'s refresh() racing that teardown.
+    menuGoAlbum: () => {
+      const albumId = this.getData().track.albumId;
+      this._closeMenu();
+      this.ctx.router.push('/album/' + albumId);
+    },
+    menuGoArtist: () => {
+      const artistId = this.getData().track.artistId;
+      this._closeMenu();
+      this.ctx.router.push('/artist/' + artistId);
+    }
+  };
+
+  // Close the menu on an outside click or Escape. Listeners live on the document
+  // for the component's lifetime and are torn down in destroyed(); they only act
+  // while this row's menu is open (each row has its own pair, self-guarded).
+  mounted() {
+    this._onDocClick = (event) => {
+      if (!this.getData().menuOpen) return;
+      if (this.element && !this.element.contains(event.target)) this._closeMenu();
+    };
+    this._onKeydown = (event) => {
+      if (event.key === 'Escape' && this.getData().menuOpen) this._closeMenu();
+    };
+    document.addEventListener('click', this._onDocClick);
+    document.addEventListener('keydown', this._onKeydown);
+  }
+
+  destroyed() {
+    document.removeEventListener('click', this._onDocClick);
+    document.removeEventListener('keydown', this._onKeydown);
+  }
+
+  _closeMenu() {
+    if (!this.getData().menuOpen) return;
+    this.setData('menuOpen', false);
+    this.refresh();
+  }
+
+  _player() {
+    return this.ctx.store.findMany('player')[0] || null;
+  }
+
+  _toast(message) {
+    const toast = this.ctx.store.findMany('toast')[0];
+    if (toast) toast.show(message);
+  }
+}
+</scripts>

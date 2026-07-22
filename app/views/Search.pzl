@@ -1,0 +1,148 @@
+<puzzle-view>
+  <header class="mb-6">
+    <h1 class="font-display text-3xl font-bold text-fg mb-4">Search</h1>
+    <input
+      type="text"
+      class="w-full max-w-xl h-12 px-4 rounded-xl bg-surface border border-hairline text-fg placeholder-faint focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/20 transition-colors"
+      placeholder="Artists, albums, songs…"
+      value={ query }
+      @input={ updateQuery(event) }
+      @keydown:escape={ clearQuery(event) }
+      autofocus />
+  </header>
+
+  {#if has}
+    {#if resultCount > 0}
+      {#if artists.length > 0}
+        <section class="mb-9">
+          <h2 class="font-display text-lg font-bold text-fg mb-4">Artists</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+            {#for artist in artists, i}
+              <ArtistCard artist={ artist } index={ i } />
+            {/for}
+          </div>
+        </section>
+      {/if}
+
+      {#if albumRows.length > 0}
+        <section class="mb-9">
+          <h2 class="font-display text-lg font-bold text-fg mb-4">Albums</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+            {#for row in albumRows, i}
+              <AlbumCard album={ row.album } artistName={ row.artistName } index={ i } />
+            {/for}
+          </div>
+        </section>
+      {/if}
+
+      {#if tracks.length > 0}
+        <section>
+          <h2 class="font-display text-lg font-bold text-fg mb-3">Songs</h2>
+          <div class="flex flex-col">
+            {#for track in tracks, i}
+              <TrackRow
+                track={ track }
+                position={ i + 1 }
+                current={ track.id === currentTrackId }
+                playing={ track.id === currentTrackId && isPlaying }
+                @play={ playTrack(track) }
+                @like={ likeTrack(track) } />
+            {/for}
+          </div>
+        </section>
+      {/if}
+    {:else}
+      <div class="py-20 text-center text-muted">No results for “{ query }”.</div>
+    {/if}
+  {:else}
+    <div class="py-20 text-center text-muted">Search your library by artist, album, or song.</div>
+  {/if}
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import ArtistCard from '../components/ArtistCard.pzl';
+import AlbumCard from '../components/AlbumCard.pzl';
+import TrackRow from '../components/TrackRow.pzl';
+
+export default class SearchView extends PuzzleView {
+  created() {
+    this.setData({ query: '' });
+  }
+
+  data(params, props) {
+    const store = this.ctx.store;
+    const query = this.getData().query || '';
+    const q = query.trim().toLowerCase();
+    const has = q.length > 0;
+
+    let artists = [];
+    let albumRows = [];
+    let tracks = [];
+
+    if (has) {
+      artists = store.findMany('artist', {
+        filter: (a) => a.name.toLowerCase().includes(q) || String(a.genre).toLowerCase().includes(q)
+      });
+
+      const artistById = {};
+      store.findMany('artist').forEach((a) => { artistById[a.id] = a; });
+
+      albumRows = store
+        .findMany('album', { filter: (al) => al.title.toLowerCase().includes(q) })
+        .map((album) => ({ album, artistName: (artistById[album.artistId] || {}).name || '' }));
+
+      tracks = store
+        .findMany('track', { filter: (t) => t.title.toLowerCase().includes(q) })
+        .sort((a, b) => b.plays - a.plays)
+        .slice(0, 8);
+    }
+
+    const player = store.findMany('player')[0] || null;
+
+    return {
+      query,
+      has,
+      artists,
+      albumRows,
+      tracks,
+      resultCount: artists.length + albumRows.length + tracks.length,
+      currentTrackId: player ? player.currentTrackId : '',
+      isPlaying: player ? player.isPlaying : false
+    };
+  }
+
+  events = {
+    // Manual bind: setData reflects the keystroke, refresh() re-runs data() so the
+    // derived result lists recompute (setData alone does not re-run data(), SPEC §4).
+    updateQuery: (event) => {
+      this.setData('query', event.target.value);
+      this.refresh();
+    },
+    // Escape clears the field and blurs it. `@keydown:escape` is a D38 key-filtered
+    // binding (SPEC §5) — the handler only fires on the Escape key, no manual
+    // event.key check. setData + refresh re-runs data() so the results reset.
+    clearQuery: (event) => {
+      this.setData('query', '');
+      this.refresh();
+      if (event.target) event.target.blur();
+    },
+    playTrack: (track) => {
+      const player = this.ctx.store.findMany('player')[0] || null;
+      const ids = this.getData().tracks.map((t) => t.id);
+      if (player) player.play(track.id, ids);
+    },
+    likeTrack: (track) => track.toggleLike()
+  };
+
+  mounted() {
+    const input = this.element.querySelector('input[type="text"]');
+    if (input) input.focus();
+  }
+
+  animations = {
+    in:  { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' },  duration: 240, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
+  };
+}
+</scripts>

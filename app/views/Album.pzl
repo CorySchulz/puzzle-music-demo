@@ -1,0 +1,140 @@
+<puzzle-view>
+  {#if album}
+    <!-- Spotify-style accent header glow: the album's accent.from at ~30% alpha
+         (headerGlow, computed in data()) fades into the page bg. First child,
+         pointer-events-none and -z-10 so it sits behind ALL content. The view root
+         is intentionally NOT positioned: the glow anchors to the layout's
+         `relative isolate` scroll container, so it spans the main area edge to
+         edge and starts at the very top — the container padding sits INSIDE
+         the gradient. -->
+    <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80" 
+      style="background:linear-gradient(to bottom, { headerGlow }, transparent)"></div>
+    <header class="mb-8">
+      <div class="flex flex-col sm:flex-row items-center sm:items-end gap-6">
+        <div data-puzzle-morph-target="album-{ album.id }" 
+          class="w-44 h-44 sm:w-52 sm:h-52 rounded-2xl shrink-0 ring-1 ring-white/10 shadow-2xl shadow-black/50" 
+          style="background:{ album.artwork }"></div>
+        <div class="text-center sm:text-left min-w-0 pb-1">
+          <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted mb-2">Album · { album.era }</div>
+          <h1 class="font-display text-3xl sm:text-5xl font-bold text-fg leading-tight">{ album.title }</h1>
+          <p class="text-muted mt-3">
+            {#if artist}
+              <a href="#/artist/{ album.artistId }" 
+                class="text-fg font-semibold hover:text-accent hover:no-underline">
+                { artist.name }
+              </a> · 
+            {/if}
+            { album.year } · { tracks.length } { tracks.length | plural('song', 'songs') } · { totalMin } min
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mt-6 justify-center sm:justify-start">
+        <Button @press={ playAlbum(event) }><Icon name="play" size={ 16 } /> Play</Button>
+      </div>
+    </header>
+
+    <section class="flex flex-col">
+      {#for track in tracks, i}
+        <TrackRow
+          track={ track }
+          position={ track.trackNo }
+          current={ track.id === currentTrackId }
+          playing={ track.id === currentTrackId && isPlaying }
+          @play={ playTrack(track) }
+          @like={ likeTrack(track) } />
+      {/for}
+    </section>
+  {:else}
+    <!-- The store is fully seeded before the first data() (beforeMount), so a
+         miss here is a genuine not-found. -->
+    <div class="py-24 text-center">
+      <h1 class="text-xl text-fg mb-2">Album not found</h1>
+      <p class="text-muted">No album with that id. <a href="#/" class="text-accent">Back to your library</a>.</p>
+    </div>
+  {/if}
+</puzzle-view>
+
+<!-- Loading template (SPEC §16, D39): shows while the async data() resolves.
+     Mirrors the real header (square tile + text bars) and 4 track rows so the
+     swap is jump-free. Static markup — no data() state readable. -->
+<puzzle-skeleton>
+  <div class="animate-pulse">
+    <header class="mb-8">
+      <div class="flex flex-col sm:flex-row items-center sm:items-end gap-6">
+        <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-2xl shrink-0 bg-surface-2"></div>
+        <div class="min-w-0 pb-1 flex-1">
+          <div class="h-3 w-24 rounded bg-surface-2 mb-3"></div>
+          <div class="h-10 w-72 max-w-full rounded-lg bg-elevated mb-3"></div>
+          <div class="h-3 w-48 rounded bg-surface-2"></div>
+        </div>
+      </div>
+    </header>
+    <div class="flex flex-col gap-2">
+      {#for 1...4}
+        <div class="h-12 rounded-lg bg-surface-2"></div>
+      {/for}
+    </div>
+  </div>
+</puzzle-skeleton>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import Button from '../components/Button.pzl';
+import TrackRow from '../components/TrackRow.pzl';
+import Icon from '../components/Icon.pzl';
+
+export default class AlbumView extends PuzzleView {
+  // Async data() (SPEC §16, D39): the <puzzle-skeleton> shows while this resolves,
+  // then the real album patches in. The store is fully seeded in beforeMount, so a
+  // missing album is a genuine not-found.
+  async data(params, props) {
+    const store = this.ctx.store;
+    const album = store.findOne('album', params.id);
+    const artist = album ? store.findOne('artist', album.artistId) : null;
+    const tracks = store
+      .findMany('track', { filter: (t) => t.albumId === params.id })
+      .sort((a, b) => a.trackNo - b.trackNo);
+    const totalSec = tracks.reduce((sum, t) => sum + (t.durationSec || 0), 0);
+    const player = store.findMany('player')[0] || null;
+
+    return {
+      album,
+      artist,
+      tracks,
+      // Header glow color: accent.from + '4d' (8-digit hex ≈ 30% alpha). Computed
+      // here, not in the template (logic stays out of the markup).
+      headerGlow: album && album.accent ? (album.accent.from || '#3a3a44') + '4d' : '',
+      trackIds: tracks.map((t) => t.id),
+      totalMin: Math.max(1, Math.round(totalSec / 60)),
+      currentTrackId: player ? player.currentTrackId : '',
+      isPlaying: player ? player.isPlaying : false
+    };
+  }
+
+  events = {
+    playAlbum: () => {
+      const player = this._player();
+      const ids = this.getData().trackIds;
+      if (player && ids.length) player.play(ids[0], ids);
+    },
+    playTrack: (track) => {
+      const player = this._player();
+      if (player) player.play(track.id, this.getData().trackIds);
+    },
+    likeTrack: (track) => track.toggleLike()
+  };
+
+  _player() {
+    return this.ctx.store.findMany('player')[0] || null;
+  }
+
+  animations = {
+    // in is OPACITY-ONLY (no translateY): the router morph engine measures the header
+    // artwork's rect once at flight start, so a transform-based entrance would slide the
+    // real artwork away from where the blob lands (~10px pop at the skeleton→real reveal).
+    in:  { from: { opacity: 0 }, to: { opacity: 1 }, duration: 260, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
+  };
+}
+</scripts>

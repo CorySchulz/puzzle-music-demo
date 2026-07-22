@@ -1,0 +1,301 @@
+<puzzle-view>
+  <!-- Components render inline (D20): the <puzzle-view> takes no attributes and
+       must wrap a SINGLE root element. This display:contents box generates no
+       layout of its own — the scrim and dialog inside are both position:fixed,
+       so they escape flow and anchor to the viewport regardless. -->
+  <div class="contents">
+  <!-- Scrim owns ALL the dimming, across both phases: it fades up the moment
+       `open` flips true (flight), and stays up under the transparent
+       ::backdrop once the dialog is modal — one continuous surface, no seam
+       between the morph flight and the modal state. -->
+  <div class="queue-scrim {#if open}is-active{/if}" @click={ scrimClick(event) }></div>
+
+  <!-- No `open` attribute — the dialog starts closed (UA display:none). The
+       MorphEngine flips it on invisibly to measure, flies it in from the Queue
+       button in normal flow, and promotes it to the top layer with showModal()
+       at the `reveal` point (still opacity 0). `data-morph` (NOT
+       `data-puzzle-morph`) keeps this invisible to the router morph integration:
+       the queue is local-state-toggled, which that integration doesn't cover. -->
+  <dialog class="queue-dialog" data-morph="queue">
+    <header class="flex items-center justify-between px-4 h-16 shrink-0 border-b border-line">
+      <div class="flex items-center gap-3">
+        <h2 class="font-display font-bold text-fg">Queue</h2>
+        <!-- Clear empties everything but the current track (models/player.js
+             clearQueue), so it only makes sense when there's something up next. -->
+        {#if showClear}
+          <button class="text-xs text-faint hover:text-fg transition-colors" title="Clear queue" @click={ clear(event) }>Clear</button>
+        {/if}
+      </div>
+      <button class="w-8 h-8 rounded-full flex items-center justify-center text-muted hover:text-fg hover:bg-surface-2 transition-colors" title="Close" aria-label="Close" @click={ close(event) }><Icon name="close" size={ 16 } /></button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-2">
+      {#if isEmpty}
+        <p class="text-center text-sm text-muted p-8">The queue is empty. Start an album to fill it.</p>
+      {:else}
+        <!-- Now playing: the current track, marked with the note glyph and not
+             removable (you can't drop the song that's playing from this list). -->
+        {#if currentItem}
+          <div class="px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">Now playing</div>
+          <div class="w-full grid grid-cols-[1.5rem_1fr_auto] items-center gap-3 px-2 py-2 rounded-lg bg-surface-2">
+            <span class="flex justify-center text-accent"><Icon name="note" size={ 14 } /></span>
+            <span class="min-w-0">
+              <span class="block truncate text-sm text-accent">{ currentItem.track.title }</span>
+              <span class="block truncate text-xs text-muted">{ currentItem.artistName }</span>
+            </span>
+            <span class="text-xs text-muted tabular-nums">{ currentItem.track.durationSec | duration }</span>
+          </div>
+        {/if}
+
+        <!-- Up next: only the entries AFTER the current track. Tracks earlier in
+             the queue have already played, so they're intentionally omitted —
+             this is a "what's coming" list, not playback history. Numbered from 1. -->
+        {#if upNext.length > 0}
+          <div class="px-2 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">Up next</div>
+          {#for item in upNext, i}
+            <!-- Row click jumps to the track; the remove button uses @click:stop
+                 (D38) so it doesn't also trigger the jump. -->
+            <div class="group w-full grid grid-cols-[1.5rem_1fr_auto_auto] items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors hover:bg-surface-2 cursor-pointer" @click={ jump(item.track) }>
+              <span class="text-xs tabular-nums flex justify-center text-faint">{ i + 1 }</span>
+              <span class="min-w-0">
+                <span class="block truncate text-sm text-fg">{ item.track.title }</span>
+                <span class="block truncate text-xs text-muted">{ item.artistName }</span>
+              </span>
+              <span class="text-xs text-muted tabular-nums">{ item.track.durationSec | duration }</span>
+              <button
+                class="transition-all text-faint opacity-0 group-hover:opacity-100 hover:text-fg"
+                title="Remove from queue"
+                aria-label="Remove from queue"
+                @click:stop={ removeItem(item.track) }>
+                <Icon name="close" size={ 14 } />
+              </button>
+            </div>
+          {/for}
+        {/if}
+      {/if}
+    </div>
+  </dialog>
+  </div>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import { MorphEngine } from '@magic-spells/morph-engine';
+import Icon from './Icon.pzl';
+
+// Centered modal queue that morphs out of the MiniPlayer's Queue button. Always
+// mounted by AppLayout; `queueOpen` (arriving as the `open` prop) is the single
+// source of truth. A dedicated MorphEngine drives the flight — NOT the router's
+// enableMorph, which only pairs route-driven data-puzzle-morph swaps; this queue
+// is toggled by local layout state, so we run the engine by hand here.
+//
+// The choreography mirrors the morph-engine demo's release-dialog handoff:
+//   open  → engine.show({ from: trigger, to: dialog }); at `reveal` (dialog
+//           still opacity 0) showModal() promotes it seam-free to the top layer.
+//   close → close() the modal then hide() in the SAME synchronous task, so the
+//           top-layer demotion and the blob cover land on one frame (no flash).
+export default class QueueDialog extends PuzzleView {
+  // Mirrors the `open` prop; afterUpdate drives the engine only on the flip.
+  _shown = false;
+
+  data(params, props) {
+    const store = this.ctx.store;
+    const player = store.findMany('player')[0] || null;
+    const currentId = player ? player.currentTrackId : '';
+    const ids = player ? player.queue : [];
+
+    const toItem = (id) => {
+      const track = store.findOne('track', id);
+      if (!track) return null;
+      const artist = store.findOne('artist', track.artistId);
+      return { track, artistName: artist ? artist.name : '' };
+    };
+
+    const currentItem = currentId ? toItem(currentId) : null;
+    // "Up next" = queue entries after the current track. If the current track
+    // isn't in the queue (idx === -1 — e.g. it was removed, or nothing is cued),
+    // every queued id is upcoming.
+    const idx = ids.indexOf(currentId);
+    const upNext = (idx > -1 ? ids.slice(idx + 1) : ids).map(toItem).filter(Boolean);
+
+    return {
+      // Layout state, arriving as a prop — drives the scrim class and the morph.
+      open: !!props.open,
+      currentItem,
+      upNext,
+      // Nothing playing and nothing queued → show the empty state.
+      isEmpty: !currentItem && upNext.length === 0,
+      // Only worth offering Clear when there are up-next entries to remove.
+      showClear: upNext.length > 0
+    };
+  }
+
+  events = {
+    // Clicks on the scrim during the pre-modal flight phase (before showModal
+    // hands outside-click duty to the ::backdrop) still request a close.
+    scrimClick: () => this._requestClose(),
+    close: () => this._requestClose(),
+    jump: (track) => {
+      const player = this.ctx.store.findMany('player')[0];
+      if (player) player.play(track.id, player.queue);
+    },
+    // Drop a single track from the queue. update() notifies subscribers, so
+    // data() re-runs and the row disappears — no manual refresh.
+    removeItem: (track) => {
+      const player = this.ctx.store.findMany('player')[0];
+      if (player) player.removeFromQueue(track.id);
+    },
+    // Clear down to just the current track, then confirm with a toast.
+    clear: () => {
+      const player = this.ctx.store.findMany('player')[0];
+      if (player) player.clearQueue();
+      const toast = this.ctx.store.findMany('toast')[0];
+      if (toast) toast.show('Queue cleared');
+    }
+  };
+
+  // ALL close paths funnel through the parent so the `open` prop flip drives the
+  // animated close (_closeDialog). Never close/hide directly from a listener.
+  _requestClose() {
+    if (typeof this.props.close === 'function') this.props.close();
+  }
+
+  // The `open` prop is the single source of truth; act only when it flips.
+  afterUpdate() {
+    const open = this.getData().open;
+    if (open === this._shown) return;
+    if (open) {
+      this._shown = true;
+      this._openDialog();
+    } else {
+      this._shown = false;
+      this._closeDialog();
+    }
+  }
+
+  _openDialog() {
+    const trigger = document.querySelector('[data-morph-trigger="queue"]');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Morph only when the trigger is present, laid out (getClientRects), and
+    // motion is allowed. Otherwise promote straight to modal — the scrim still
+    // provides the dim, so the fallback matches the morphed look.
+    if (trigger && trigger.getClientRects().length > 0 && !reduced) {
+      // Fire-and-forget; the `reveal` listener promotes to modal mid-flight.
+      this._engine.show({ from: trigger, to: this._dialog, display: 'flex' });
+    } else if (!this._dialog.open) {
+      this._dialog.showModal();
+    }
+  }
+
+  _closeDialog() {
+    // Mid-morph or settled: demote the modal, then reverse the blob home in the
+    // SAME task so the dialog drops back into normal flow at the identical rect
+    // and the blob covers it on that frame (no flash) — the demo's pattern.
+    if (this._engine.state === 'showing' || this._engine.state === 'shown') {
+      if (this._dialog.open) this._dialog.close();
+      this._engine.hide();
+    } else if (this._dialog.open) {
+      this._dialog.close();
+    }
+  }
+
+  // Promote at `reveal`, not at settle: the dialog is still opacity 0 there, so
+  // the top-layer repaint lands on an invisible surface and it fades in modal.
+  // Guard on _shown: `reveal` is an async engine event, and a rapid close (or a
+  // flight resumed after the tab was hidden) can land it AFTER we've already been
+  // asked to close — promoting then would wedge a modal open with no scrim.
+  _onReveal = () => { if (this._shown && !this._dialog.open) this._dialog.showModal(); };
+  // A reversal that swings back below the reveal point demotes it the same way.
+  _onUnreveal = () => { if (this._dialog.open) this._dialog.close(); };
+  // Native Escape while modal — morph home instead of snapping shut.
+  _onCancel = (event) => { event.preventDefault(); this._requestClose(); };
+  // While modal, outside clicks land on the dialog itself via the ::backdrop.
+  _onDialogClick = (event) => { if (event.target === this._dialog) this._requestClose(); };
+  // Safety net: if the dialog is closed by some path we didn't drive, resync
+  // layout state. Our own _closeDialog has already set _shown false, so it won't
+  // re-enter here.
+  _onDialogClose = () => { if (this._shown) this._requestClose(); };
+
+  mounted() {
+    this._dialog = this.element.querySelector('dialog');
+    // Blob above the app's z-50 toast during flight. Spring tuning matches the
+    // router integration's defaults (client-runtime/morph.js) — the engine's own
+    // defaults are floatier and trail a long visually-dead settle.
+    this._engine = new MorphEngine({ attraction: 0.1, friction: 0.32, zIndex: 60 });
+    this._engine.on('reveal', this._onReveal);
+    this._engine.on('unreveal', this._onUnreveal);
+    this._dialog.addEventListener('cancel', this._onCancel);
+    this._dialog.addEventListener('click', this._onDialogClick);
+    this._dialog.addEventListener('close', this._onDialogClose);
+  }
+
+  destroyed() {
+    // AppLayout is destroyed on the layout swap to /now-playing — don't leak the
+    // engine or a stuck body scroll lock.
+    if (this._dialog) {
+      this._dialog.removeEventListener('cancel', this._onCancel);
+      this._dialog.removeEventListener('click', this._onDialogClick);
+      this._dialog.removeEventListener('close', this._onDialogClose);
+    }
+    if (this._engine) {
+      if (this._engine.state !== 'idle') this._engine.stop();
+      this._engine.destroy();
+    }
+  }
+}
+</scripts>
+
+<styles>
+/* The engine drives inline transform/opacity/display during the flight, so the
+ * stylesheet must NOT set transform positioning, opacity, transition, or
+ * animation on .queue-dialog itself. Position with inset/margin only (never
+ * transform), and pin max-*:none so the in-flow rect and the :modal rect are
+ * geometrically identical — no jump at the showModal() promotion. Anchored to
+ * the right edge, floating above the player bar (h-20 = 5rem, +1rem gap). */
+.queue-dialog {
+  position: fixed;
+  inset: 1rem 1rem 6rem auto;
+  margin: 0;
+  width: min(24rem, calc(100vw - 2rem));
+  /* UA dialog styles set height: fit-content, which would ignore the bottom
+     inset — auto lets top+bottom stretch it into a full-height right panel. */
+  height: auto;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  color: inherit;
+  border: 1px solid var(--color-line);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+.queue-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+/* Transparent — the separate scrim owns ALL dimming, so the flight and modal
+ * phases share one continuous surface. */
+.queue-dialog::backdrop {
+  background: transparent;
+}
+
+.queue-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+.queue-scrim.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .queue-scrim {
+    transition: none;
+  }
+}
+</styles>

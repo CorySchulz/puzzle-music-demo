@@ -1,0 +1,159 @@
+<puzzle-view>
+  <header class="mb-8">
+    <!-- Time-of-day greeting. `hour` (0-23) is computed in data(); the branch is
+         chosen here in the template with an {:else if} chain (SPEC §6, v1.9/D40 —
+         zero-or-more {:else if} clauses between the {#if} body and the trailing
+         {:else}, desugared to nested {#if} at parse time). -->
+    <h1 class="font-display text-3xl font-bold text-fg">
+      {#if hour < 5}Night owl session{:else if hour < 12}Good morning{:else if hour < 18}Good afternoon{:else}Good evening{/if}
+    </h1>
+    <p class="text-muted mt-1">{ artists.length } { artists.length | plural('artist', 'artists') } · { albums.length } albums in your library</p>
+  </header>
+
+  <!-- Quick picks — Spotify-style wide tiles: a small square gradient tile + a
+       name, laid out in a 2/3-col grid. Liked Songs is pinned first, then one
+       tile per playlist. -->
+  <section class="mb-10">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <a href="#/liked" class="group flex items-center gap-3 h-14 rounded-lg bg-surface hover:bg-surface-2 hover:no-underline overflow-hidden transition-colors">
+        <span class="w-14 h-14 shrink-0 flex items-center justify-center text-white/90" style="background:linear-gradient(135deg,#7c5cff,#c86dd7)"><Icon name="heart-filled" size={ 20 } /></span>
+        <span class="font-semibold text-fg truncate pr-3">Liked Songs</span>
+      </a>
+      {#for p in playlists, i}
+        <a href="#/playlist/{ p.id }" class="group flex items-center gap-3 h-14 rounded-lg bg-surface hover:bg-surface-2 hover:no-underline overflow-hidden transition-colors">
+          <span class="w-14 h-14 shrink-0" style="background:{ p.artwork }"></span>
+          <span class="font-semibold text-fg truncate pr-3">{ p.name }</span>
+        </a>
+      {/for}
+    </div>
+  </section>
+
+  <!-- Recently played — only when there's history. Albums render newest-first in
+       the order the player recorded them (models/player.js recentAlbumIds). -->
+  {#if recentRows.length > 0}
+    <section class="mb-10">
+      <h2 class="font-display text-xl font-bold text-fg mb-4">Recently played</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+        {#for row in recentRows, i}
+          <AlbumCard album={ row.album } artistName={ row.artistName } index={ i } />
+        {/for}
+      </div>
+    </section>
+  {/if}
+
+  <section class="mb-10">
+    <h2 class="font-display text-xl font-bold text-fg mb-4">Artists</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+      {#for artist in artists, i}
+        <ArtistCard artist={ artist } index={ i } />
+      {/for}
+    </div>
+  </section>
+
+  <section>
+    <h2 class="font-display text-xl font-bold text-fg mb-4">Albums</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+      {#for row in albumRows, i}
+        <AlbumCard album={ row.album } artistName={ row.artistName } index={ i } />
+      {/for}
+    </div>
+  </section>
+</puzzle-view>
+
+<!-- Loading template (SPEC §16, D39). This view is the entry route, so its
+     skeleton is the very first paint: navigation commits immediately and this
+     renders while the async data() resolves, then the real Home patches
+     over it (no layout jump — same grids/containers). Static markup only. -->
+<puzzle-skeleton>
+  <div class="animate-pulse">
+    <header class="mb-8">
+      <div class="h-9 w-56 max-w-full rounded-lg bg-elevated mb-2"></div>
+      <div class="h-3 w-40 rounded bg-surface-2"></div>
+    </header>
+
+    <section class="mb-10">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {#for 1...4}
+          <div class="h-14 rounded-lg bg-surface-2"></div>
+        {/for}
+      </div>
+    </section>
+
+    <section class="mb-10">
+      <div class="h-5 w-24 rounded bg-surface-2 mb-4"></div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+        {#for 1...4}
+          <div class="flex flex-col items-center">
+            <div class="aspect-square w-full rounded-full bg-surface-2 mb-3"></div>
+            <div class="h-3 w-20 rounded bg-surface-2"></div>
+          </div>
+        {/for}
+      </div>
+    </section>
+
+    <section>
+      <div class="h-5 w-24 rounded bg-surface-2 mb-4"></div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
+        {#for 1...4}
+          <div>
+            <div class="aspect-square w-full rounded-xl bg-surface-2 mb-3"></div>
+            <div class="h-3 w-24 rounded bg-surface-2"></div>
+          </div>
+        {/for}
+      </div>
+    </section>
+  </div>
+</puzzle-skeleton>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import ArtistCard from '../components/ArtistCard.pzl';
+import AlbumCard from '../components/AlbumCard.pzl';
+import Icon from '../components/Icon.pzl';
+
+export default class LibraryView extends PuzzleView {
+  // Async data() (SPEC §16, D39): the <puzzle-skeleton> above is the first paint
+  // while this resolves, then the real Home patches in. The store is seeded in
+  // beforeMount.
+  async data(params, props) {
+    const store = this.ctx.store;
+    const artists = store.findMany('artist');
+    const albums = store.findMany('album');
+    const player = store.findMany('player')[0] || null;
+
+    // Join album → artist name here (in data(), not the template).
+    const artistById = {};
+    artists.forEach((a) => { artistById[a.id] = a; });
+    const rowFor = (album) => ({
+      album,
+      artistName: (artistById[album.artistId] || {}).name || ''
+    });
+
+    const albumRows = albums.map(rowFor);
+
+    // Recently played: resolve the player's recentAlbumIds (newest first) to real
+    // album records, dropping any that no longer exist, and keep the order.
+    const recentIds = player ? player.recentAlbumIds : [];
+    const recentRows = recentIds
+      .map((id) => store.findOne('album', id))
+      .filter(Boolean)
+      .map(rowFor);
+
+    return {
+      artists,
+      albums,
+      albumRows,
+      recentRows,
+      // Playlists for the Quick picks tiles, sorted by their `order` field.
+      playlists: store.findMany('playlist').slice().sort((a, b) => a.order - b.order),
+      // Current hour (0-23) drives the greeting {:else if} chain in the template.
+      hour: new Date().getHours()
+    };
+  }
+
+  animations = {
+    in:  { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' },  duration: 260, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
+  };
+}
+</scripts>

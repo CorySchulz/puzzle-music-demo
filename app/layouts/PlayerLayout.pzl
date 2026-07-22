@@ -1,0 +1,46 @@
+<puzzle-view class="h-screen flex flex-col bg-bg text-fg overflow-hidden">
+  <header class="flex items-center justify-between px-5 py-4 shrink-0">
+    <button
+      class="w-10 h-10 rounded-full flex items-center justify-center text-muted hover:text-fg hover:bg-surface-2 transition-colors"
+      title="Close player"
+      aria-label="Close player"
+      @click={ close(event) }><Icon name="chevron-down" size={ 22 } /></button>
+    <span class="text-[11px] font-semibold uppercase tracking-[0.2em] text-faint">Now Playing</span>
+    <span class="w-10"></span>
+  </header>
+
+  <!-- `relative isolate`: positioning context for NowPlaying's accent glow, so it
+       spans this scroll area edge to edge from the very top. -->
+  <main class="flex-1 min-h-0 overflow-y-auto relative isolate">
+    <Slot/>
+  </main>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import Icon from '../components/Icon.pzl';
+
+// Full-screen chrome for /now-playing. It rides a different layout class than the
+// rest of the app, so arriving here is a layout swap: AppLayout animates out, this
+// slides up. Closing routes back to the current track's album (or home).
+export default class PlayerLayout extends PuzzleView {
+  data(params, props) {
+    return {};
+  }
+
+  events = {
+    close: () => {
+      const player = this.ctx.store.findOne('player', 'session');
+      const track = player && player.currentTrackId
+        ? this.ctx.store.findOne('track', player.currentTrackId)
+        : null;
+      this.ctx.router.push(track ? `/album/${track.albumId}` : '/');
+    }
+  };
+
+  animations = {
+    in:  { from: { opacity: 0, transform: 'translateY(28px)' }, to: { opacity: 1, transform: 'translateY(0)' },  duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(28px)' }, duration: 200, easing: 'ease-in' }
+  };
+}
+</scripts>

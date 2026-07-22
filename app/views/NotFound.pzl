@@ -1,0 +1,22 @@
+<puzzle-view>
+  <div class="py-24 text-center">
+    <div class="font-display text-6xl font-bold text-fg mb-2">404</div>
+    <p class="text-muted mb-6">We couldn't find that page.</p>
+    <a href="#/" class="inline-block px-5 py-2.5 rounded-full bg-accent text-accent-ink text-sm font-semibold hover:bg-accent-2 hover:no-underline transition-colors">Back to your library</a>
+  </div>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+
+export default class NotFoundView extends PuzzleView {
+  data(params, props) {
+    return {};
+  }
+
+  animations = {
+    in:  { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' },  duration: 240, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
+  };
+}
+</scripts>

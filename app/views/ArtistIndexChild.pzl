@@ -1,0 +1,13 @@
+<puzzle-view class="hidden"></puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+
+// The empty index leaf for /artist/:id (path '') so the parent ArtistView always
+// has a child to render at its <Slot/>. Renders nothing (hidden); its only job is
+// to occupy the slot when no dialog is open. Navigating to /artist/:id/info swaps
+// ArtistInfoDialog in here, and the router morphs the shared data-puzzle-morph
+// element (the Info button ↔ the dialog shell). NO animations field — a view that
+// declares one would animate on every open/close and fight the morph (D55).
+export default class ArtistIndexChild extends PuzzleView {}
+</scripts>

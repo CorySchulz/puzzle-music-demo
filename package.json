@@ -1,0 +1,20 @@
+{
+  "name": "puzzle-music-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Puzzle Sounds — a v1.1 music library + player showcasing the router, view/layout transitions, and the animation system",
+  "main": "app.js",
+  "scripts": {
+    "dev": "puzzle dev",
+    "build": "puzzle build"
+  },
+  "dependencies": {
+    "@magic-spells/morph-engine": "^0.1.0",
+    "@magic-spells/puzzle": "^0.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.14",
+    "tailwindcss": "^4.1.14"
+  },
+  "type": "module"
+}

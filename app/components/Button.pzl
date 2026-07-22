@@ -1,0 +1,33 @@
+<puzzle-view>
+  <button
+    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed {#if variant === 'ghost'}bg-transparent text-fg border border-hairline hover:border-fg/40{/if}{#if variant === 'primary'}bg-accent text-accent-ink hover:bg-accent-2 hover:scale-[1.03] active:scale-95{/if}"
+    type={ type }
+    disabled={ disabled }
+    @click={ handleClick }>
+    <children/>
+  </button>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+
+// Reusable button (component mode renders inline — no wrapper, single root, D20).
+// Label content projects through <children/>; `press` is a callback prop (D16).
+export default class Button extends PuzzleView {
+  data(params, props) {
+    return {
+      variant: props.variant || 'primary',
+      type: props.type || 'button',
+      disabled: props.disabled || false
+    };
+  }
+
+  events = {
+    handleClick: (event) => {
+      if (this.getData().disabled) return;
+      const { press } = this.props;
+      if (typeof press === 'function') press(event);
+    }
+  };
+}
+</scripts>

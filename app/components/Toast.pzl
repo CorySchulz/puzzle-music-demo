@@ -1,0 +1,83 @@
+<puzzle-view>
+  <!-- Stable root (a component needs a single root element). `display:contents`
+       means it generates no box of its own — nothing renders until there's a
+       message, then the fixed pill appears inside. -->
+  <span class="contents">
+    {#if message}
+      <!-- A small pill floated just above the MiniPlayer (bottom-24 clears the
+           h-20 bar). z-50 keeps it over the queue drawer. The CSS keyframe below
+           plays the fade+slide on first appearance (empty → shown). -->
+      <div class="toast-pill fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-elevated text-fg text-sm font-medium ring-1 ring-hairline shadow-2xl shadow-black/50">
+        { message }
+      </div>
+    {/if}
+  </span>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+
+// Global toast surface. Reads the single local-only toast record
+// (models/toast.js) via findMany, so any show() elsewhere re-runs data() and the
+// pill flashes. Rendered once by AppLayout, outside the queue-drawer conditional.
+export default class Toast extends PuzzleView {
+  data(params, props) {
+    const toast = this.ctx.store.findMany('toast')[0] || null;
+    return {
+      message: toast ? toast.message : '',
+      // The nonce keys the auto-dismiss timer: it bumps on every show() even
+      // when the text repeats, so we can tell "a newer toast" from "same toast".
+      nonce: toast ? toast.nonce : 0
+    };
+  }
+
+  // (Re)arm the ~2.2s auto-dismiss on mount and after every toast change.
+  mounted() { this._arm(); }
+  afterUpdate() { this._arm(); }
+
+  // Start a dismiss timer keyed on the current nonce. Guards:
+  //  - skip when there's no message (nothing to dismiss);
+  //  - skip if we've already armed for this exact nonce (avoid double timers);
+  //  - the callback only clears the record if its nonce STILL matches — a newer
+  //    show() (higher nonce) supersedes us and this stale timer becomes a no-op.
+  _arm() {
+    const { message, nonce } = this.getData();
+    if (!message) return;
+    if (this._armedNonce === nonce) return;
+    this._armedNonce = nonce;
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => {
+      const toast = this.ctx.store.findMany('toast')[0];
+      if (toast && toast.nonce === nonce && toast.message === message) {
+        toast.update({ message: '' });
+      }
+    }, 2200);
+  }
+
+  destroyed() {
+    clearTimeout(this._timer);
+    this._timer = null;
+  }
+
+  // Subtle enter/leave on the component root (SPEC §12). Toast stays mounted with
+  // the layout, so this brackets layout swaps; the per-message entrance is the
+  // CSS keyframe on .toast-pill.
+  animations = {
+    in:  { from: { opacity: 0, transform: 'translateY(8px)' }, to: { opacity: 1, transform: 'translateY(0)' }, duration: 200, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' }, to: { opacity: 0, transform: 'translateY(8px)' }, duration: 140, easing: 'ease-in' }
+  };
+}
+</scripts>
+
+<styles>
+.toast-pill {
+  animation: toast-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-pill { animation: none; }
+}
+</styles>

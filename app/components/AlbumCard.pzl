@@ -1,0 +1,75 @@
+<puzzle-view>
+  <a href="#/album/{ album.id }" class="group block hover:no-underline">
+    <div
+      data-puzzle-morph-trigger="album-{ album.id }"
+      class="aspect-square rounded-xl mb-3 relative overflow-hidden shadow-lg shadow-black/40 ring-1 ring-white/10 transition-transform duration-200 group-hover:scale-[1.02]"
+      style="background:{ album.artwork }">
+      <div class="absolute inset-0 flex items-end p-3 bg-gradient-to-t from-black/35 to-transparent">
+        <span class="font-display text-lg font-bold text-white leading-tight drop-shadow">{ album.title }</span>
+      </div>
+
+      <!-- Hover play button (SPEC §5, D38 showcase). The card root is an <a>, but
+           this button plays the album WITHOUT navigating: @click:prevent:stop
+           runs preventDefault (kills the anchor's navigation) + stopPropagation
+           (keeps the click from bubbling to the <a>), so the modifiers alone are
+           why the link doesn't fire — no manual event handling. Hidden until
+           hover, and always shown on keyboard focus (focus-visible). -->
+      <button
+        type="button"
+        class="absolute bottom-3 right-3 w-11 h-11 rounded-full bg-accent text-accent-ink shadow-xl flex items-center justify-center opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 focus-visible:opacity-100 focus-visible:translate-y-0"
+        aria-label="Play { album.title }"
+        @click:prevent:stop={ playAlbum(event) }>
+        <span class="translate-x-px flex"><Icon name="play" size={ 18 } /></span>
+      </button>
+    </div>
+    <div class="text-sm font-semibold text-fg truncate">{ album.title }</div>
+    <div class="text-xs text-muted mt-0.5 truncate">{ album.year } · { artistName }</div>
+  </a>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+import Icon from './Icon.pzl';
+
+export default class AlbumCard extends PuzzleView {
+  data(params, props) {
+    return {
+      album: props.album,
+      artistName: props.artistName || ''
+    };
+  }
+
+  // The card art is a morph TRIGGER (D69): the router pairs it with the Album
+  // header's matching data-puzzle-morph-target on the sibling view swap — forward
+  // only, no click handler needed.
+  events = {
+    // Play the album's tracks in trackNo order, first track cued. Navigation is
+    // suppressed by the @click:prevent:stop modifiers on the button (D38), so
+    // this only starts playback — the card's <a> never fires.
+    playAlbum: () => {
+      const store = this.ctx.store;
+      const album = this.getData().album;
+      if (!album) return;
+      const ids = store
+        .findMany('track', { filter: (t) => t.albumId === album.id })
+        .sort((a, b) => a.trackNo - b.trackNo)
+        .map((t) => t.id);
+      const player = store.findMany('player')[0] || null;
+      if (player && ids.length) player.play(ids[0], ids);
+    }
+  };
+
+  get animations() {
+    const index = this.props.index ?? 0;
+    return {
+      in: {
+        from: { opacity: 0, transform: 'translateY(16px)' },
+        to:   { opacity: 1, transform: 'translateY(0)' },
+        duration: 320,
+        delay: index * 55,
+        easing: 'ease-out'
+      }
+    };
+  }
+}
+</scripts>

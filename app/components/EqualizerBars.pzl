@@ -1,0 +1,40 @@
+<puzzle-view>
+  <!-- Range loop with the v1.2 counter binding: `{#for 1...5, i}` exposes the
+       current number as `i`, which becomes each bar's animation-delay so the
+       bars ripple instead of pulsing in unison. Bars only animate while playing. -->
+  <div class="flex items-end gap-[3px] h-3.5 leading-none">
+    {#for 1...5, i}
+      <span
+        class="eq-bar w-[3px] h-full rounded-full bg-current {#if playing}eq-bar--on{/if}"
+        style="animation-delay:{ i * 110 }ms"></span>
+    {/for}
+  </div>
+</puzzle-view>
+
+<scripts>
+import { PuzzleView } from '@magic-spells/puzzle';
+
+// A tiny "now playing" visualizer. `playing` (bool prop) gates the animation.
+export default class EqualizerBars extends PuzzleView {
+  data(params, props) {
+    return { playing: !!props.playing };
+  }
+}
+</scripts>
+
+<styles>
+.eq-bar {
+  transform: scaleY(0.3);
+  transform-origin: bottom;
+}
+.eq-bar--on {
+  animation: eq-bounce 900ms ease-in-out infinite;
+}
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.28); }
+  50%      { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eq-bar--on { animation: none; transform: scaleY(0.7); }
+}
+</styles>
