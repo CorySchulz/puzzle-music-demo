@@ -1,5 +1,7 @@
 # Puzzle Sounds
 
+**[View the app live →](https://puzzle-music-demo.vercel.app/)**
+
 A Spotify-style music app built with the
 [Puzzle framework](https://github.com/magic-spells/puzzle) — browse a library of
 6 artists / 12 albums / 48 tracks, dig into artist and album pages, build
