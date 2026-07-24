@@ -104,7 +104,7 @@
   </div>
 </puzzle-skeleton>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import Button from '../components/Button.pzl';
 import TrackRow from '../components/TrackRow.pzl';
@@ -186,4 +186,4 @@ export default class ArtistView extends PuzzleView {
     out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
   };
 }
-</scripts>
+</script>

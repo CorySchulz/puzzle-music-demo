@@ -16,7 +16,7 @@
   </main>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import Icon from '../components/Icon.pzl';
 
@@ -43,4 +43,4 @@ export default class PlayerLayout extends PuzzleView {
     out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(28px)' }, duration: 200, easing: 'ease-in' }
   };
 }
-</scripts>
+</script>

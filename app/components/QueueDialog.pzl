@@ -78,7 +78,7 @@
   </div>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import { MorphEngine } from '@magic-spells/morph-engine';
 import Icon from './Icon.pzl';
@@ -243,9 +243,9 @@ export default class QueueDialog extends PuzzleView {
     }
   }
 }
-</scripts>
+</script>
 
-<styles>
+<style>
 /* The engine drives inline transform/opacity/display during the flight, so the
  * stylesheet must NOT set transform positioning, opacity, transition, or
  * animation on .queue-dialog itself. Position with inset/margin only (never
@@ -298,4 +298,4 @@ export default class QueueDialog extends PuzzleView {
     transition: none;
   }
 }
-</styles>
+</style>

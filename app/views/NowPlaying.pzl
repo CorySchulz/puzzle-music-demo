@@ -67,7 +67,7 @@
   {/if}
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import EqualizerBars from '../components/EqualizerBars.pzl';
 import Icon from '../components/Icon.pzl';
@@ -159,4 +159,4 @@ export default class NowPlayingView extends PuzzleView {
     }
   }
 }
-</scripts>
+</script>

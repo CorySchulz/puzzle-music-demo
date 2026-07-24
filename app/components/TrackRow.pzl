@@ -76,7 +76,7 @@
   </div>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import EqualizerBars from './EqualizerBars.pzl';
 import Icon from './Icon.pzl';
@@ -196,4 +196,4 @@ export default class TrackRow extends PuzzleView {
     if (toast) toast.show(message);
   }
 }
-</scripts>
+</script>

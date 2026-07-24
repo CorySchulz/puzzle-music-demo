@@ -8,7 +8,7 @@
   </button>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // Reusable button (component mode renders inline — no wrapper, single root, D20).
@@ -30,4 +30,4 @@ export default class Button extends PuzzleView {
     }
   };
 }
-</scripts>
+</script>

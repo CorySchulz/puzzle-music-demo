@@ -27,7 +27,7 @@
   </a>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import Icon from './Icon.pzl';
 
@@ -72,4 +72,4 @@ export default class AlbumCard extends PuzzleView {
     };
   }
 }
-</scripts>
+</script>

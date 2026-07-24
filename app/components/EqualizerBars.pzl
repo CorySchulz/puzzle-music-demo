@@ -11,7 +11,7 @@
   </div>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // A tiny "now playing" visualizer. `playing` (bool prop) gates the animation.
@@ -20,9 +20,9 @@ export default class EqualizerBars extends PuzzleView {
     return { playing: !!props.playing };
   }
 }
-</scripts>
+</script>
 
-<styles>
+<style>
 .eq-bar {
   transform: scaleY(0.3);
   transform-origin: bottom;
@@ -37,4 +37,4 @@ export default class EqualizerBars extends PuzzleView {
 @media (prefers-reduced-motion: reduce) {
   .eq-bar--on { animation: none; transform: scaleY(0.7); }
 }
-</styles>
+</style>

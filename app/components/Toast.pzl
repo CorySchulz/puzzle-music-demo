@@ -14,7 +14,7 @@
   </span>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // Global toast surface. Reads the single local-only toast record
@@ -67,9 +67,9 @@ export default class Toast extends PuzzleView {
     out: { from: { opacity: 1, transform: 'translateY(0)' }, to: { opacity: 0, transform: 'translateY(8px)' }, duration: 140, easing: 'ease-in' }
   };
 }
-</scripts>
+</script>
 
-<styles>
+<style>
 .toast-pill {
   animation: toast-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -80,4 +80,4 @@ export default class Toast extends PuzzleView {
 @media (prefers-reduced-motion: reduce) {
   .toast-pill { animation: none; }
 }
-</styles>
+</style>

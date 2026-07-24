@@ -82,7 +82,7 @@
   <Toast />
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import MiniPlayer from '../components/MiniPlayer.pzl';
 import QueueDialog from '../components/QueueDialog.pzl';
@@ -199,4 +199,4 @@ export default class AppLayout extends PuzzleView {
     out: { from: { opacity: 1, transform: 'scale(1)' },    to: { opacity: 0, transform: 'scale(0.99)' }, duration: 180, easing: 'ease-in' }
   };
 }
-</scripts>
+</script>

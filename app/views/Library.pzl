@@ -105,7 +105,7 @@
   </div>
 </puzzle-skeleton>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 import ArtistCard from '../components/ArtistCard.pzl';
 import AlbumCard from '../components/AlbumCard.pzl';
@@ -156,4 +156,4 @@ export default class LibraryView extends PuzzleView {
     out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
   };
 }
-</scripts>
+</script>

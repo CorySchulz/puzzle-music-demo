@@ -91,7 +91,7 @@
   </svg>
 </puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // Reusable inline-SVG icon (component mode renders inline — no wrapper, single
@@ -104,4 +104,4 @@ export default class Icon extends PuzzleView {
     };
   }
 }
-</scripts>
+</script>

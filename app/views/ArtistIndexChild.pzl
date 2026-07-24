@@ -1,6 +1,6 @@
 <puzzle-view class="hidden"></puzzle-view>
 
-<scripts>
+<script>
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // The empty index leaf for /artist/:id (path '') so the parent ArtistView always
@@ -10,4 +10,4 @@ import { PuzzleView } from '@magic-spells/puzzle';
 // element (the Info button ↔ the dialog shell). NO animations field — a view that
 // declares one would animate on every open/close and fight the morph (D55).
 export default class ArtistIndexChild extends PuzzleView {}
-</scripts>
+</script>
