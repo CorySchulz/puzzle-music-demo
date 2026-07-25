@@ -1,7 +1,7 @@
 <puzzle-view class="contents">
   <div class="fixed inset-0 z-40 flex items-center justify-center p-4 sm:p-8">
     <button type="button" class="artist-info-backdrop absolute inset-0" aria-label="Close" @click={ close }></button>
-    <dialog class="artist-info-dialog relative flex w-full max-w-lg flex-col" open="open" data-puzzle-morph="artist-info-{ artistId }">
+    <dialog class="artist-info-dialog relative flex w-full max-w-lg flex-col" open="open" data-puzzle-morph-target="artist-info-{ artistId }">
       {#if artist}
         <header class="flex items-start justify-between gap-4 px-7 pt-7">
           <div class="flex items-center gap-4 min-w-0">
@@ -43,10 +43,16 @@ import { PuzzleView } from '@magic-spells/puzzle';
 // Routed overlay for an artist's details — the leaf child of the artist route
 // (path 'info'), rendered inside ArtistView's <Slot/> so the artist page (and the
 // Info button that opened it) stays mounted beneath it. There is ZERO morph code
-// in this view: the <dialog> shell shares its data-puzzle-morph value with the
-// button, and the router pairs them on the way in and out (D55) — including the
-// browser back button. Escape / backdrop / the ✕ button just navigate; the
-// reverse morph is awaited by the router before this view is destroyed.
+// in this view: the <dialog> shell shares its morph id with the button via
+// data-puzzle-morph-target, and the router pairs them on the way in and out (D55)
+// — including the browser back button. `-target` (receive-only), NOT the plain
+// attribute: the shell only ever lands (the button launches), and the reverse
+// flight rides the stored pair so it still flies home on close. Receive-only also
+// keeps clicks inside the shell (the ✕ button) out of the router integration's
+// click-pin path — a plain-attributed shell would be recorded as the clicked
+// launch element and pinned as a frozen ghost clone behind the fly-back.
+// Escape / backdrop / the ✕ button just navigate; the reverse morph is awaited
+// by the router before this view is destroyed.
 export default class ArtistInfoDialog extends PuzzleView {
   created() {
     this._onKey = (event) => {

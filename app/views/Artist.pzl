@@ -21,8 +21,8 @@
       <div class="flex items-center gap-3 mt-6">
         <Button @press={ playArtist(event) }><Icon name="play" size={ 16 } /> Play</Button>
         <!-- Plain <button> (NOT the Button component) so the morph attribute sits
-             on the REAL rendered element the router pairs. Shares its
-             data-puzzle-morph value with the /artist/:id/info dialog shell, so
+             on the REAL rendered element the router pairs. Shares its morph id
+             with the /artist/:id/info dialog shell's data-puzzle-morph-target, so
              pushing that route grows this button into the dialog and flies it back
              on close (D55). No dynamic style={} binding here (morph rule). -->
         <button

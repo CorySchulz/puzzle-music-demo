@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@magic-spells/morph-engine": "^0.1.0",
-    "@magic-spells/puzzle": "^0.2.0"
+    "@magic-spells/puzzle": "^0.3.1"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.14",
