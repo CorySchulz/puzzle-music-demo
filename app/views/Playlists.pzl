@@ -1,0 +1,84 @@
+<puzzle-view>
+  <header class="mb-6 flex items-end justify-between gap-4">
+    <div>
+      <h1 class="font-display text-3xl font-bold text-fg">Playlists</h1>
+      <p class="text-muted mt-1">{ playlists.length } { playlists.length | plural('playlist', 'playlists') }</p>
+    </div>
+    <Button @press={ newPlaylist(event) }><Icon name="plus" size={ 16 } /> New</Button>
+  </header>
+
+  <section class="flex flex-col gap-1">
+    <!-- Liked Songs is pinned first, exactly as it is in the sidebar and on the
+         Library page — it behaves like a playlist but lives on the `liked` flag. -->
+    <a href="#/liked" class="flex items-center gap-4 p-2 rounded-xl hover:bg-surface-2 hover:no-underline transition-colors">
+      <span class="w-14 h-14 rounded-lg shrink-0 flex items-center justify-center ring-1 ring-white/10 text-white/90" style="background:linear-gradient(135deg,#7c5cff,#c86dd7)"><Icon name="heart-filled" size={ 22 } /></span>
+      <span class="min-w-0">
+        <span class="block truncate font-semibold text-fg">Liked Songs</span>
+        <span class="block text-xs text-muted">{ likedCount } { likedCount | plural('song', 'songs') }</span>
+      </span>
+    </a>
+
+    {#for p in playlists, i}
+      <a href="#/playlist/{ p.id }" class="flex items-center gap-4 p-2 rounded-xl hover:bg-surface-2 hover:no-underline transition-colors">
+        <span class="w-14 h-14 rounded-lg shrink-0 ring-1 ring-white/10" style="background:{ p.artwork }"></span>
+        <span class="min-w-0">
+          <span class="block truncate font-semibold text-fg">{ p.name }</span>
+          <span class="block text-xs text-muted">{ p.trackIds.length } { p.trackIds.length | plural('song', 'songs') }</span>
+        </span>
+      </a>
+    {/for}
+  </section>
+
+  {#if playlists.length === 0}
+    <div class="py-16 text-center">
+      <p class="text-muted">No playlists yet — make one and start filling it.</p>
+    </div>
+  {/if}
+</puzzle-view>
+
+<script>
+import { PuzzleView } from '@magic-spells/puzzle';
+import Button from '../components/Button.pzl';
+import Icon from '../components/Icon.pzl';
+
+// The Playlists index — the mobile bottom nav's third tab. On desktop the
+// sidebar already lists every playlist, so this page mainly serves small screens
+// where that sidebar is hidden; it stays reachable at /playlists either way.
+export default class PlaylistsView extends PuzzleView {
+  data(params, props) {
+    const store = this.ctx.store;
+    // findMany subscribes this view, so creating/renaming a playlist (or liking
+    // a track) updates the list without any manual refresh.
+    const playlists = store
+      .findMany('playlist')
+      .slice()
+      .sort((a, b) => a.order - b.order);
+    const likedCount = store.findMany('track', { filter: (t) => t.liked }).length;
+    return { playlists, likedCount };
+  }
+
+  events = {
+    // Same create-and-navigate flow as the sidebar's "New playlist" button
+    // (layouts/AppLayout.pzl): the user lands on the new page and renames inline.
+    newPlaylist: () => {
+      const store = this.ctx.store;
+      const orders = store.findMany('playlist').map((p) => p.order);
+      const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
+      const id = 'pl-' + Date.now().toString(36);
+      store.createRecord('playlist', {
+        id,
+        name: 'My Playlist',
+        trackIds: [],
+        accent: { from: '#7c5cff', to: '#a855f7' },
+        order: nextOrder,
+      });
+      this.ctx.router.push('/playlist/' + id); // path-shaped (hash mode encodes it)
+    },
+  };
+
+  animations = {
+    in:  { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' },  duration: 260, easing: 'ease-out' },
+    out: { from: { opacity: 1, transform: 'translateY(0)' },    to: { opacity: 0, transform: 'translateY(-8px)' }, duration: 160, easing: 'ease-in' }
+  };
+}
+</script>

@@ -17,10 +17,13 @@
       {/if}
     </button>
 
-    <div class="min-w-0">
+    <!-- The title block is a second play target, not just decoration: on touch
+         the 2rem number button on the left is a small tap target, so tapping the
+         track name plays it too. Same `play` callback prop as the number. -->
+    <button class="min-w-0 text-left hover:no-underline" title="Play" @click={ play(event) }>
       <div class="truncate font-medium {#if current}text-accent{/if}{#if !current}text-fg{/if}">{ track.title }</div>
       <div class="text-xs text-muted">{ track.plays | compact } plays</div>
-    </div>
+    </button>
 
     <!-- `relative` so the context-menu popover can anchor to this cluster (the
          grid's third column). The track lists have no overflow-hidden ancestor,

@@ -6,6 +6,7 @@ import AlbumView from './views/Album.pzl';
 import SearchView from './views/Search.pzl';
 import LikedView from './views/Liked.pzl';
 import PlaylistView from './views/Playlist.pzl';
+import PlaylistsView from './views/Playlists.pzl';
 import NowPlayingView from './views/NowPlaying.pzl';
 import NotFoundView from './views/NotFound.pzl';
 
@@ -35,6 +36,7 @@ export default [
   { path: '/album/:id',   name: 'album',       view: AlbumView,      layout: AppLayout,    meta: { title: 'Album · Puzzle Sounds' } },
   { path: '/search',      name: 'search',      view: SearchView,     layout: AppLayout,    meta: { title: 'Search · Puzzle Sounds' } },
   { path: '/liked',       name: 'liked',       view: LikedView,      layout: AppLayout,    meta: { title: 'Liked Songs · Puzzle Sounds' } },
+  { path: '/playlists',   name: 'playlists',   view: PlaylistsView,  layout: AppLayout,    meta: { title: 'Playlists · Puzzle Sounds' } },
   { path: '/playlist/:id',name: 'playlist',    view: PlaylistView,   layout: AppLayout,    meta: { title: 'Playlist · Puzzle Sounds' } },
   { path: '/now-playing', name: 'now-playing', view: NowPlayingView, layout: PlayerLayout, meta: { title: 'Now Playing · Puzzle Sounds' } },
   { path: '*',            name: 'not-found',   view: NotFoundView,   layout: AppLayout,    meta: { title: 'Not Found · Puzzle Sounds' } },

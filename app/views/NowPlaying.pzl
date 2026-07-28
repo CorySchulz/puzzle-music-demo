@@ -1,4 +1,10 @@
-<puzzle-view class="h-full flex flex-col items-center justify-center px-6 pb-10">
+<!-- `min-h-full` (not h-full) so the column can grow PAST the scroll container
+     when the content is taller than the viewport — with h-full the overflow had
+     nowhere to go. `justify-center-safe` centers while everything fits and falls
+     back to top-aligned once it doesn't: plain `justify-center` splits the
+     overflow evenly above and below, and a scroll container cannot scroll into
+     the part above its top edge, so the artwork was permanently cut off. -->
+<puzzle-view class="min-h-full flex flex-col items-center justify-center-safe px-6 py-8 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
   {#if track}
     <!-- Spotify-style accent glow from the current album's accent.from (~30%
          alpha, headerGlow computed in data()), pooled behind the artwork at the

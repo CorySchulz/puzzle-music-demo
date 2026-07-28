@@ -78,6 +78,10 @@
           <Icon name="home" size={ 22 } />
           Home
         </a>
+        <a href="#/playlists" class="flex-1 flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors hover:no-underline {#if section === 'playlists'}text-fg{:else}text-muted{/if}">
+          <Icon name="library" size={ 22 } />
+          Playlists
+        </a>
         <a href="#/search" class="flex-1 flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors hover:no-underline {#if section === 'search'}text-fg{:else}text-muted{/if}">
           <Icon name="search" size={ 22 } />
           Search
@@ -122,16 +126,16 @@ export default class AppLayout extends PuzzleView {
   // one-element chain, so every other comparison is unchanged.
   data(params, props) {
     const name = this.route.chain[0].name;
+    // Playlist-ish routes (the index, a single playlist, Liked Songs) light the
+    // mobile nav's Playlists tab; everything browse-y stays under 'library'.
     const section =
-      name === 'library' ||
-      name === 'artist' ||
-      name === 'album' ||
-      name === 'liked' ||
-      name === 'playlist'
+      name === 'library' || name === 'artist' || name === 'album'
         ? 'library'
-        : name === 'search'
-          ? 'search'
-          : '';
+        : name === 'playlists' || name === 'playlist' || name === 'liked'
+          ? 'playlists'
+          : name === 'search'
+            ? 'search'
+            : '';
     // Sidebar "Library" links derived from the store (sorted by name) rather than
     // hardcoded, so the list tracks the seeded data.
     const artists = this.ctx.store
