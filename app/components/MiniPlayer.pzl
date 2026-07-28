@@ -2,7 +2,9 @@
   <!-- sm+: a 3-column grid — fluid left/right flanks, center capped at 36rem —
        so the transport sits dead-center of the SCREEN and the volume cluster
        hugs the right edge at any width. Below sm it stays a simple flex row. -->
-  <div class="shrink-0 border-t border-line bg-surface h-20 px-3 sm:px-4 flex items-center gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,36rem)_minmax(0,1fr)] sm:gap-4">
+  <!-- Mobile: transparent and border-less — it sits inside AppLayout's floating
+       dock, which owns the blur, rounding and surface. sm+: it IS the surface. -->
+  <div class="shrink-0 h-16 sm:h-20 sm:border-t sm:border-line sm:bg-surface px-3 sm:px-4 flex items-center gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,36rem)_minmax(0,1fr)] sm:gap-4">
     {#if track}
       <button class="flex items-center gap-3 min-w-0 flex-1 sm:flex-none text-left hover:no-underline" title="Open now playing" @click={ openPlayer(event) }>
         <div class="w-12 h-12 rounded-md shrink-0 shadow ring-1 ring-white/10" style="background:{ artwork }"></div>

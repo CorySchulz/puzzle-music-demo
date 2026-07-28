@@ -4,10 +4,11 @@
        message, then the fixed pill appears inside. -->
   <span class="contents">
     {#if message}
-      <!-- A small pill floated just above the MiniPlayer (bottom-24 clears the
-           h-20 bar). z-50 keeps it over the queue drawer. The CSS keyframe below
+      <!-- A small pill floated just above the MiniPlayer: bottom-40 clears the
+           mobile floating dock (player + tab bar), bottom-24 the h-20 desktop
+           bar. z-50 keeps it over the queue drawer. The CSS keyframe below
            plays the fade+slide on first appearance (empty → shown). -->
-      <div class="toast-pill fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-elevated text-fg text-sm font-medium ring-1 ring-hairline shadow-2xl shadow-black/50">
+      <div class="toast-pill fixed bottom-40 sm:bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-elevated text-fg text-sm font-medium ring-1 ring-hairline shadow-2xl shadow-black/50">
         { message }
       </div>
     {/if}
