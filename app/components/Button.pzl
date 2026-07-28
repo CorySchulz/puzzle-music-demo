@@ -4,7 +4,7 @@
     type={ type }
     disabled={ disabled }
     @click={ handleClick }>
-    <children/>
+    <Children/>
   </button>
 </puzzle-view>
 
@@ -12,7 +12,7 @@
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // Reusable button (component mode renders inline — no wrapper, single root, D20).
-// Label content projects through <children/>; `press` is a callback prop (D16).
+// Label content projects through <Children/>; `press` is a callback prop (D16).
 export default class Button extends PuzzleView {
   data(params, props) {
     return {
