@@ -1,4 +1,4 @@
-<puzzle-view class="h-screen flex flex-col bg-bg text-fg overflow-hidden">
+<puzzle-view class="h-dvh flex flex-col bg-bg text-fg overflow-hidden">
   <div class="flex-1 flex min-h-0">
     <!-- Sidebar. Stays mounted across Library/Artist/Album/Search navigations
          because they all reuse this layout — only <Slot/> swaps. -->

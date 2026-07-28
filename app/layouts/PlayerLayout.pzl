@@ -1,4 +1,4 @@
-<puzzle-view class="h-screen flex flex-col bg-bg text-fg overflow-hidden">
+<puzzle-view class="h-dvh flex flex-col bg-bg text-fg overflow-hidden">
   <header class="flex items-center justify-between px-5 py-4 shrink-0">
     <button
       class="w-10 h-10 rounded-full flex items-center justify-center text-muted hover:text-fg hover:bg-surface-2 transition-colors"
