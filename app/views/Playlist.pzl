@@ -18,12 +18,18 @@
                input. `@keydown:enter` / `@keydown:escape` are key-filtered
                bindings — the handler only fires on that key, no manual
                `event.key` checks. Enter saves, Escape cancels; focus is grabbed
-               once in afterUpdate(). -->
+               once in afterUpdate().
+
+               `String(playlist.name)` is deliberate: puzzle 0.5.0 auto-binds a
+               handler-less `value={ playlist.name }` two-way, which would write
+               the record on every keystroke and make Escape-cancel impossible.
+               Wrapping it in a non-path expression opts out and keeps the
+               edit-buffer semantics this showcase is about. -->
           {#if renaming}
             <input
               type="text"
               class="font-display text-3xl sm:text-5xl font-bold text-fg leading-tight bg-transparent border-b-2 border-accent/60 focus:outline-none w-full max-w-xl"
-              value={ playlist.name }
+              value={ String(playlist.name) }
               @keydown:enter={ saveRename(event) }
               @keydown:escape={ cancelRename(event) }
               aria-label="Playlist name" />

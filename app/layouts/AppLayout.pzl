@@ -98,6 +98,10 @@
   <!-- Global toast surface — always mounted (outside the queue conditional) so a
        show() from any view flashes the pill above the MiniPlayer. -->
   <Toast />
+
+  <!-- One-off "view the source on GitHub" card. Self-dismissing surface, so it
+       just needs to be mounted somewhere persistent. -->
+  <CodeBanner />
 </puzzle-view>
 
 <script>
@@ -105,6 +109,7 @@ import { PuzzleView } from '@magic-spells/puzzle';
 import MiniPlayer from '../components/MiniPlayer.pzl';
 import QueueDialog from '../components/QueueDialog.pzl';
 import Toast from '../components/Toast.pzl';
+import CodeBanner from '../components/CodeBanner.pzl';
 import Icon from '../components/Icon.pzl';
 
 export default class AppLayout extends PuzzleView {

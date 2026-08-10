@@ -1,0 +1,94 @@
+<puzzle-view>
+  <!-- Stable root with `display:contents` (same trick as Toast): the component
+       always has one root element, but it generates no box until the card is
+       actually shown. -->
+  <span class="contents">
+    {#if visible}
+      <div
+        class="code-banner fixed z-50 top-3 inset-x-3 sm:inset-x-auto sm:top-4 sm:right-4 sm:w-80
+               flex items-start gap-3 px-4 py-3 rounded-2xl
+               bg-elevated/90 backdrop-blur-xl ring-1 ring-hairline shadow-2xl shadow-black/60"
+        role="status">
+        <span class="shrink-0 mt-0.5 text-fg"><Icon name="github" size={ 20 } /></span>
+
+        <div class="min-w-0 flex-1">
+          <p class="text-sm text-fg leading-snug">You can view the code for this demo here</p>
+          <a
+            href="https://github.com/CorySchulz/puzzle-music-demo"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline">
+            CorySchulz/puzzle-music-demo
+            <Icon name="external" size={ 13 } />
+          </a>
+        </div>
+
+        <button
+          class="shrink-0 -mr-1 -mt-1 w-7 h-7 rounded-full flex items-center justify-center text-faint hover:text-fg hover:bg-surface-2 transition-colors"
+          title="Dismiss"
+          aria-label="Dismiss"
+          @click={ dismiss(event) }><Icon name="close" size={ 15 } /></button>
+      </div>
+    {/if}
+  </span>
+</puzzle-view>
+
+<script>
+import { PuzzleView } from '@magic-spells/puzzle';
+import Icon from '../components/Icon.pzl';
+
+const STORAGE_KEY = 'puzzle-music:code-banner-dismissed';
+const SHOW_DELAY = 1200;
+
+// One-off "view the source" card. Rendered by AppLayout so it rides above every
+// view; dismissal is remembered for the tab session (sessionStorage), so it
+// shows once per visit rather than nagging on every navigation.
+export default class CodeBanner extends PuzzleView {
+  data(params, props) {
+    return { visible: this.getData().visible || false };
+  }
+
+  events = {
+    dismiss: () => {
+      this.setData('visible', false);
+      try {
+        sessionStorage.setItem(STORAGE_KEY, '1');
+      } catch (err) {
+        /* private mode — the card just reappears next navigation, harmless */
+      }
+    },
+  };
+
+  // Browser-only: storage reads and the reveal timer both belong here, never in
+  // data() (which also runs under node when a build prerenders).
+  mounted() {
+    let dismissed = false;
+    try {
+      dismissed = sessionStorage.getItem(STORAGE_KEY) === '1';
+    } catch (err) {
+      /* ignore */
+    }
+    if (dismissed) return;
+    // Let the app's entrance animations land before the card slides in.
+    this._timer = setTimeout(() => this.setData('visible', true), SHOW_DELAY);
+  }
+
+  destroyed() {
+    clearTimeout(this._timer);
+    this._timer = null;
+  }
+}
+</script>
+
+<style>
+.code-banner {
+  animation: code-banner-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes code-banner-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .code-banner { animation: none; }
+}
+</style>
