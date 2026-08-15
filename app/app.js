@@ -1,5 +1,14 @@
 import { PuzzleApp } from '@magic-spells/puzzle';
 import { enableMorph } from '@magic-spells/puzzle/morph';
+// Hash routing is an opt-in factory since 0.6.0 (D159) — path routing is the
+// zero-config default, so hash/memory live behind this subpath and a path-mode
+// app never bundles either one.
+import { hashRouter } from '@magic-spells/puzzle/router-modes';
+// Server sync is an opt-in capability since 0.6.0 (D157): the adapter runtime
+// (loadAll/loadOne, record.save/delete, store.request) moved out of the core
+// store. The models keep their bare `static adapter = { endpoint }` shorthand;
+// this import is what makes those endpoints actually dispatch.
+import { adapter } from '@magic-spells/puzzle/adapter';
 import routes from './routes.js';
 import models from './models/index.js';
 import { loadState, saveState } from './storage.js';
@@ -13,7 +22,11 @@ const app = new PuzzleApp({
   // Route rides in location.hash (`…/index.html#/album/x`), so the built example
   // hosts on any static host — GitHub Pages / S3 / file:// — with no server
   // rewrite rules (SPEC §15, D34). App code stays path-shaped; only URLs differ.
-  routerMode: 'hash',
+  routerMode: hashRouter(),
+  // Read-path server sync (D157). The bare capability is all this demo needs —
+  // every model uses the plain `{ endpoint }` REST shorthand and only ever
+  // reads, so there's no app-wide dialect to configure via adapter.defaults().
+  adapter,
   // No apiURL prefix: each model's adapter endpoint (e.g. '/artists.json') is
   // root-relative, so the seed files sit flat at the site root next to
   // index.html (dist/artists.json) and host anywhere with zero path wiring.

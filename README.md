@@ -40,7 +40,8 @@ serves `index.html` and the flat seed JSON next to it.
 
 | Feature in the app | Framework surface |
 | --- | --- |
-| Route in `location.hash`, static-host friendly | **Hash routing** — `routerMode: 'hash'` (SPEC §15, D34) |
+| Route in `location.hash`, static-host friendly | **Hash routing** — `routerMode: hashRouter()` from `@magic-spells/puzzle/router-modes` (SPEC §15, D34/D159) |
+| Artists / albums / tracks read from flat JSON at the site root | **Adapter capability** — `import { adapter } from '@magic-spells/puzzle/adapter'` passed to `PuzzleApp`, plus each model's `{ endpoint }` REST shorthand (D157) |
 | Home / Artist / Album paint a skeleton, then swap in real data | **Skeleton loading** — `<puzzle-skeleton>` + async `data()` (SPEC §16, D39); the store itself is seeded in the app's `beforeMount` hook (SPEC §30, D60) |
 | Icon set picks its glyph by name; repeat button picks its icon by mode | **`{#case}` / `{:when}`** multi-branch (D37) |
 | Time-of-day greeting on Home (night / morning / afternoon / evening) | **`{:else if}` chaining** (D40) |
@@ -118,7 +119,7 @@ dependency — an app that imports none of these paths bundles none of it.
 
 ```
 app/
-├── app.js              # PuzzleApp config (hash mode, formatters) + parallel seed in beforeMount (D60)
+├── app.js              # PuzzleApp config (hashRouter + adapter capability, formatters) + parallel seed in beforeMount (D60)
 ├── routes.js           # 8 flat routes across two layouts (AppLayout vs PlayerLayout)
 ├── storage.js          # localStorage load/save (one key: puzzle-sounds/v1)
 ├── models/
