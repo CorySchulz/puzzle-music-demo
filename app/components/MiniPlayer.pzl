@@ -61,10 +61,10 @@ import Icon from './Icon.pzl';
 
 // The persistent playback bar. It reads the single player record (via
 // findMany('player') so it subscribes to the type — the record is created at
-// boot and this stays live through it) and, while mounted, owns the 1-second
-// tick that advances progress and auto-advances at track end. On a layout swap
-// to the full-screen player this unmounts (timer cleared) and NowPlaying takes
-// over the tick; progress is unbroken because it lives in the store record.
+// boot and this stays live through it) and writes back through the model's
+// methods. It owns no clock: app/audio.js drives the real <audio> element and
+// writes progressSec into the record, so this view (and NowPlaying, and any
+// future surface) just renders whatever the record says.
 export default class MiniPlayer extends PuzzleView {
   data(params, props) {
     const store = this.ctx.store;
@@ -113,27 +113,6 @@ export default class MiniPlayer extends PuzzleView {
 
   _player() {
     return this.ctx.store.findMany('player')[0] || null;
-  }
-
-  mounted() {
-    this._timer = setInterval(() => this._tick(), 1000);
-  }
-
-  destroyed() {
-    if (this._timer) clearInterval(this._timer);
-    this._timer = null;
-  }
-
-  _tick() {
-    const player = this._player();
-    if (!player || !player.isPlaying || !player.currentTrackId) return;
-    const track = this.ctx.store.findOne('track', player.currentTrackId);
-    if (!track) return;
-    if (player.progressSec + 1 >= track.durationSec) {
-      player.advance(); // auto-advance: repeat/shuffle rules live in the model
-    } else {
-      player.update({ progressSec: player.progressSec + 1 });
-    }
   }
 }
 </script>

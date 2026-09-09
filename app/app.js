@@ -5,10 +5,11 @@ import { enableMorph } from '@magic-spells/puzzle/morph';
 // app never bundles either one.
 import { hashRouter } from '@magic-spells/puzzle/router-modes';
 // Server sync is an opt-in capability since 0.6.0 (D157): the adapter runtime
-// (loadAll/loadOne, record.save/delete, store.request) moved out of the core
+// (loadMany/loadOne, record.save/delete, store.request) moved out of the core
 // store. The models keep their bare `static adapter = { endpoint }` shorthand;
 // this import is what makes those endpoints actually dispatch.
 import { adapter } from '@magic-spells/puzzle/adapter';
+import { enableAudio } from './audio.js';
 import routes from './routes.js';
 import models from './models/index.js';
 import { loadState, saveState } from './storage.js';
@@ -52,15 +53,14 @@ const app = new PuzzleApp({
   },
 
   // Seed the store from the static JSON (D21 read path) + restore persisted state
-  // before navigation #0. loadAll upserts by primary key and notifies subscribers,
-  // so it must never run inside data(). beforeMount is awaited, so the store is
-  // fully populated before the first data() runs — a missing record is genuinely
-  // not-found, not a mid-load blank (SPEC §16/§30).
+  // before navigation #0. Since 0.7.0 (D161) views fault their own reads, so the
+  // seed is no longer needed for rendering — it stays because the restore below
+  // runs outside data(), where findOne never fetches, and it needs warm records.
   async beforeMount(app) {
     await Promise.all([
-      app.store.loadAll('artist').catch((err) => console.error('[music] artist seed failed:', err)),
-      app.store.loadAll('album').catch((err) => console.error('[music] album seed failed:', err)),
-      app.store.loadAll('track').catch((err) => console.error('[music] track seed failed:', err)),
+      app.store.loadMany('artist').catch((err) => console.error('[music] artist seed failed:', err)),
+      app.store.loadMany('album').catch((err) => console.error('[music] album seed failed:', err)),
+      app.store.loadMany('track').catch((err) => console.error('[music] track seed failed:', err)),
     ]);
 
     // Restore likes + last session from localStorage.
@@ -173,8 +173,17 @@ const app = new PuzzleApp({
 // inner pane, so window scroll is inert. Note the Queue dialog deliberately does NOT
 // use this — it's toggled by local layout state, which the router morph doesn't
 // cover, so it drives its own MorphEngine by hand instead.
-enableMorph(app);
+// Softened off the engine's 0.1 default: a lower attraction eases the spring so
+// the art settles into place with less bounce.
+enableMorph(app, { attraction: 0.08 });
 
 app.mount();
+
+// Real playback (app/audio.js): one shared <audio> element subscribed to the
+// player record. Wired AFTER mount() starts — app.store throws before that — but
+// synchronously, so it is already following the store by the time the awaited
+// beforeMount creates (or restores) the session record. Nothing else in the app
+// touches media APIs; every surface just reads and writes the player record.
+enableAudio(app);
 
 export default app;

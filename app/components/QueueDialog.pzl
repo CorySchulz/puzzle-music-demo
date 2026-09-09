@@ -218,10 +218,19 @@ export default class QueueDialog extends PuzzleView {
 
   mounted() {
     this._dialog = this.element.querySelector('dialog');
-    // Blob above the app's z-50 toast during flight. Spring tuning matches the
-    // router integration's defaults (client-runtime/morph.js) — the engine's own
-    // defaults are floatier and trail a long visually-dead settle.
-    this._engine = new MorphEngine({ attraction: 0.1, friction: 0.32, zIndex: 60 });
+    // Blob above the app's z-50 toast during flight. The open leg matches the
+    // router integration in app.js, so every morph in the app opens the same way.
+    // The `hide` bag overlays that on the close leg only (directional settings,
+    // morph-engine 0.2.0+): closing is quick, damped and hands the button back
+    // early, so dismissing the panel reads as a snap rather than a performance —
+    // but friction stays under the 0.5 that lands dead, keeping a trace of spring
+    // in the settle.
+    this._engine = new MorphEngine({
+      attraction: 0.08,
+      friction: 0.32,
+      zIndex: 60,
+      hide: { attraction: 0.18, friction: 0.44, revealAt: 0.6 },
+    });
     this._engine.on('reveal', this._onReveal);
     this._engine.on('unreveal', this._onUnreveal);
     this._dialog.addEventListener('cancel', this._onCancel);

@@ -128,7 +128,7 @@ export default class Player extends PuzzleModel {
     return i > -1 && i + 1 < q.length ? q[i + 1] : '';
   }
 
-  // AUTO-advance — fired by the 1-second tick when a track reaches its end.
+  // AUTO-advance — fired by app/audio.js on the audio element's `ended` event.
   // repeat 'one' restarts the same track in place; otherwise move on per the
   // order rules (wrap on 'all', stop on 'off').
   advance() {

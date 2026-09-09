@@ -79,10 +79,10 @@ import EqualizerBars from '../components/EqualizerBars.pzl';
 import Icon from '../components/Icon.pzl';
 
 // Full-screen player. No `animations` field: it rides PlayerLayout's swap
-// (one animator per transition, SPEC §12). It owns the playback tick while
-// visible — started in viewDidShow(), stopped in viewWillHide() — which is why
-// those lifecycle hooks exist. The MiniPlayer owns the tick everywhere else;
-// only one is ever mounted, so the clock never double-counts.
+// (one animator per transition, SPEC §12). It owns no clock either: app/audio.js
+// drives the shared <audio> element and writes progressSec into the player
+// record, so this view and the MiniPlayer read one already-advancing position
+// and neither has to hand the other a timer across the layout swap.
 export default class NowPlayingView extends PuzzleView {
   data(params, props) {
     const store = this.ctx.store;
@@ -133,36 +133,6 @@ export default class NowPlayingView extends PuzzleView {
 
   _player() {
     return this.ctx.store.findMany('player')[0] || null;
-  }
-
-  // Lifecycle hooks (v1.1): own the tick only while this view is on screen.
-  viewDidShow() {
-    this._timer = setInterval(() => this._tick(), 1000);
-  }
-
-  viewWillHide() {
-    this._stopTick();
-  }
-
-  destroyed() {
-    this._stopTick();
-  }
-
-  _stopTick() {
-    if (this._timer) clearInterval(this._timer);
-    this._timer = null;
-  }
-
-  _tick() {
-    const player = this._player();
-    if (!player || !player.isPlaying || !player.currentTrackId) return;
-    const track = this.ctx.store.findOne('track', player.currentTrackId);
-    if (!track) return;
-    if (player.progressSec + 1 >= track.durationSec) {
-      player.advance(); // auto-advance: repeat/shuffle rules live in the model
-    } else {
-      player.update({ progressSec: player.progressSec + 1 });
-    }
   }
 }
 </script>
