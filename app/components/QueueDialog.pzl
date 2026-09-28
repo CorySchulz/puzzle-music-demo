@@ -55,7 +55,7 @@
           {#for item in upNext, i}
             <!-- Row click jumps to the track; the remove button uses @click:stop
                  (D38) so it doesn't also trigger the jump. -->
-            <div class="group w-full grid grid-cols-[1.5rem_1fr_auto_auto] items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors hover:bg-surface-2 cursor-pointer" @click={ jump(item.track) }>
+            <div key={ item.track.id } class="group w-full grid grid-cols-[1.5rem_1fr_auto_auto] items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors hover:bg-surface-2 cursor-pointer" @click={ jump(item.track) }>
               <span class="text-xs tabular-nums flex justify-center text-faint">{ i + 1 }</span>
               <span class="min-w-0">
                 <span class="block truncate text-sm text-fg">{ item.track.title }</span>

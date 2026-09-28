@@ -29,7 +29,7 @@
           <h2 class="font-display text-lg font-bold text-fg mb-4">Albums</h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
             {#for row in albumRows, i}
-              <AlbumCard album={ row.album } artistName={ row.artistName } index={ i } />
+              <AlbumCard key={ row.album.id } album={ row.album } artistName={ row.artistName } index={ i } />
             {/for}
           </div>
         </section>
