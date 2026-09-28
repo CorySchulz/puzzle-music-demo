@@ -19,12 +19,10 @@
           <h1 class="font-display text-3xl sm:text-5xl font-bold text-fg leading-tight">{ album.title }</h1>
           <p class="text-muted mt-3">
             {#if artist}
-              <a href="#/artist/{ album.artistId }" 
-                class="text-fg font-semibold hover:text-accent hover:no-underline">
-                { artist.name }
-              </a> · 
+              <a href="#/artist/{ album.artistId }"
+                class="text-fg font-semibold hover:text-accent hover:no-underline">{ artist.name }</a> ·
             {/if}
-            { album.year } · { tracks.length } { tracks.length | plural('song', 'songs') } · { totalMin } min
+            { album.year } · { tracks.size | pluralize('song') } · { totalMin } min
           </p>
         </div>
       </div>

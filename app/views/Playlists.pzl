@@ -2,7 +2,7 @@
   <header class="mb-6 flex items-end justify-between gap-4">
     <div>
       <h1 class="font-display text-3xl font-bold text-fg">Playlists</h1>
-      <p class="text-muted mt-1">{ playlists.length } { playlists.length | plural('playlist', 'playlists') }</p>
+      <p class="text-muted mt-1">{ playlists.size | pluralize('playlist') }</p>
     </div>
     <Button @press={ newPlaylist(event) }><Icon name="plus" size={ 16 } /> New</Button>
   </header>
@@ -14,7 +14,7 @@
       <span class="w-14 h-14 rounded-lg shrink-0 flex items-center justify-center ring-1 ring-white/10 text-white/90" style="background:linear-gradient(135deg,#7c5cff,#c86dd7)"><Icon name="heart-filled" size={ 22 } /></span>
       <span class="min-w-0">
         <span class="block truncate font-semibold text-fg">Liked Songs</span>
-        <span class="block text-xs text-muted">{ likedCount } { likedCount | plural('song', 'songs') }</span>
+        <span class="block text-xs text-muted">{ likedCount | pluralize('song') }</span>
       </span>
     </a>
 
@@ -23,13 +23,13 @@
         <span class="w-14 h-14 rounded-lg shrink-0 ring-1 ring-white/10" style="background:{ p.artwork }"></span>
         <span class="min-w-0">
           <span class="block truncate font-semibold text-fg">{ p.name }</span>
-          <span class="block text-xs text-muted">{ p.trackIds.length } { p.trackIds.length | plural('song', 'songs') }</span>
+          <span class="block text-xs text-muted">{ p.trackIds.size | pluralize('song') }</span>
         </span>
       </a>
     {/for}
   </section>
 
-  {#if playlists.length === 0}
+  {#if playlists.size === 0}
     <div class="py-16 text-center">
       <p class="text-muted">No playlists yet — make one and start filling it.</p>
     </div>

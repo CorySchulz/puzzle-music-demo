@@ -13,7 +13,7 @@
 
   {#if has}
     {#if resultCount > 0}
-      {#if artists.length > 0}
+      {#if artists.size > 0}
         <section class="mb-9">
           <h2 class="font-display text-lg font-bold text-fg mb-4">Artists</h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
@@ -24,7 +24,7 @@
         </section>
       {/if}
 
-      {#if albumRows.length > 0}
+      {#if albumRows.size > 0}
         <section class="mb-9">
           <h2 class="font-display text-lg font-bold text-fg mb-4">Albums</h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
@@ -35,7 +35,7 @@
         </section>
       {/if}
 
-      {#if tracks.length > 0}
+      {#if tracks.size > 0}
         <section>
           <h2 class="font-display text-lg font-bold text-fg mb-3">Songs</h2>
           <div class="flex flex-col">

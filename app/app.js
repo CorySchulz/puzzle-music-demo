@@ -35,21 +35,15 @@ const app = new PuzzleApp({
   apiURL: '',
 
   // Display-only formatters (logic belongs in data()). `duration` turns a track's
-  // durationSec into m:ss; `compact` shortens big play counts; `plural` picks a
-  // word form.
+  // durationSec into m:ss. Play counts use the standard `compact_number` and
+  // labels the standard `pluralize`, so the app registers only what the standard
+  // set lacks.
   formatters: {
     duration: (sec) => {
       const s = Math.max(0, Math.round(Number(sec) || 0));
       const m = Math.floor(s / 60);
       return `${m}:${String(s % 60).padStart(2, '0')}`;
     },
-    compact: (n) => {
-      const num = Number(n) || 0;
-      if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(num >= 10_000_000 ? 0 : 1)}M`;
-      if (num >= 1_000) return `${(num / 1_000).toFixed(num >= 10_000 ? 0 : 1)}K`;
-      return String(num);
-    },
-    plural: (count, singular, plural) => (count === 1 ? singular : plural || `${singular}s`),
   },
 
   // Seed the store from the static JSON (D21 read path) + restore persisted state

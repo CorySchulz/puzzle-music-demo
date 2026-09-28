@@ -20,11 +20,11 @@
 
         <div class="flex items-center gap-8 px-7 pt-6">
           <div>
-            <div class="font-display text-2xl font-bold text-fg tabular-nums">{ artist.followers | compact }</div>
+            <div class="font-display text-2xl font-bold text-fg tabular-nums">{ artist.followers | compact_number }</div>
             <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint mt-0.5">Followers</div>
           </div>
           <div>
-            <div class="font-display text-2xl font-bold text-fg tabular-nums">{ artist.monthlyListeners | compact }</div>
+            <div class="font-display text-2xl font-bold text-fg tabular-nums">{ artist.monthlyListeners | compact_number }</div>
             <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint mt-0.5">Monthly listeners</div>
           </div>
         </div>

@@ -53,7 +53,7 @@ serves `index.html` and the flat seed JSON next to it.
 | `{#for track in tracks, i}`, `{#for 1...5, i}` | **Loop counters** (D29) |
 | Player, toast, and playlists live only in the store (never fetched) | **Local-only store records** — no adapter, created at boot |
 | Liking a song anywhere lights it up in Liked Songs and the row instantly | **Reactive store subscriptions** — `findMany({ filter })` re-runs `data()` |
-| `m:ss` durations, compacted play counts, pluralized labels | **Formatters** with args (`duration`, `compact`, `plural`) |
+| `m:ss` durations, compacted play counts, pluralized labels | **Formatters** — an app formatter (`duration`) beside the standard `compact_number` and `pluralize('song')` |
 | Scroll resets to top on nav, restores on back/forward | **Router scroll behavior** (default; D33) |
 | Likes / playlists / session snapshot survive reloads | **localStorage persistence pattern** — one key, saved on `visibilitychange` / `beforeunload` |
 | Spotify-style accent bleed at the top of album / artist / playlist / liked / player pages | Per-record `accent` gradient (`Puzzle.object()`) → low-alpha header glow computed in `data()` |

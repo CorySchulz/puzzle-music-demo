@@ -50,7 +50,7 @@
         <!-- Up next: only the entries AFTER the current track. Tracks earlier in
              the queue have already played, so they're intentionally omitted —
              this is a "what's coming" list, not playback history. Numbered from 1. -->
-        {#if upNext.length > 0}
+        {#if upNext.size > 0}
           <div class="px-2 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">Up next</div>
           {#for item in upNext, i}
             <!-- Row click jumps to the track; the remove button uses @click:stop
