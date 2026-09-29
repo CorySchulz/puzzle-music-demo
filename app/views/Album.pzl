@@ -22,7 +22,7 @@
               <a href="#/artist/{ album.artistId }"
                 class="text-fg font-semibold hover:text-accent hover:no-underline">{ artist.name }</a> ·
             {/if}
-            { album.year } · { tracks.size | pluralize('song') } · { totalMin } min
+            { album.year } · { pluralize(tracks.length, 'song') } · { totalMin } min
           </p>
         </div>
       </div>

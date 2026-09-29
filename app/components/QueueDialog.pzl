@@ -43,14 +43,14 @@
               <span class="block truncate text-sm text-accent">{ currentItem.track.title }</span>
               <span class="block truncate text-xs text-muted">{ currentItem.artistName }</span>
             </span>
-            <span class="text-xs text-muted tabular-nums">{ currentItem.track.durationSec | duration }</span>
+            <span class="text-xs text-muted tabular-nums">{ duration(currentItem.track.durationSec) }</span>
           </div>
         {/if}
 
         <!-- Up next: only the entries AFTER the current track. Tracks earlier in
              the queue have already played, so they're intentionally omitted —
              this is a "what's coming" list, not playback history. Numbered from 1. -->
-        {#if upNext.size > 0}
+        {#if upNext.length > 0}
           <div class="px-2 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-faint">Up next</div>
           {#for item in upNext, i}
             <!-- Row click jumps to the track; the remove button uses @click:stop
@@ -61,7 +61,7 @@
                 <span class="block truncate text-sm text-fg">{ item.track.title }</span>
                 <span class="block truncate text-xs text-muted">{ item.artistName }</span>
               </span>
-              <span class="text-xs text-muted tabular-nums">{ item.track.durationSec | duration }</span>
+              <span class="text-xs text-muted tabular-nums">{ duration(item.track.durationSec) }</span>
               <button
                 class="transition-all text-faint opacity-0 group-hover:opacity-100 hover:text-fg"
                 title="Remove from queue"

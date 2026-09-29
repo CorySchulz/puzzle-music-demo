@@ -7,7 +7,7 @@
     <h1 class="font-display text-3xl font-bold text-fg">
       {#if hour < 5}Night owl session{:else if hour < 12}Good morning{:else if hour < 18}Good afternoon{:else}Good evening{/if}
     </h1>
-    <p class="text-muted mt-1">{ artists.size | pluralize('artist') } · { albums.size | pluralize('album') } in your library</p>
+    <p class="text-muted mt-1">{ pluralize(artists.length, 'artist') } · { pluralize(albums.length, 'album') } in your library</p>
   </header>
 
   <!-- Quick picks — Spotify-style wide tiles: a small square gradient tile + a
@@ -30,7 +30,7 @@
 
   <!-- Recently played — only when there's history. Albums render newest-first in
        the order the player recorded them (models/player.js recentAlbumIds). -->
-  {#if recentRows.size > 0}
+  {#if recentRows.length > 0}
     <section class="mb-10">
       <h2 class="font-display text-xl font-bold text-fg mb-4">Recently played</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">

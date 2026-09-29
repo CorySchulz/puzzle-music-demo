@@ -20,16 +20,16 @@
                `event.key` checks. Enter saves, Escape cancels; focus is grabbed
                once in afterUpdate().
 
-               `playlist.name ?? ''` is deliberate: a handler-less
+               `String(playlist.name)` is deliberate: a handler-less
                `value={ playlist.name }` binds two-way, which would write the
                record on every keystroke and make Escape-cancel impossible. A
-               non-path expression opts out and keeps the edit-buffer semantics
-               this showcase is about. -->
+               call is not a bindable path, so it opts out and keeps the edit-buffer
+               semantics this showcase is about. -->
           {#if renaming}
             <input
               type="text"
               class="font-display text-3xl sm:text-5xl font-bold text-fg leading-tight bg-transparent border-b-2 border-accent/60 focus:outline-none w-full max-w-xl"
-              value={ playlist.name ?? '' }
+              value={ String(playlist.name) }
               @keydown:enter={ saveRename(event) }
               @keydown:escape={ cancelRename(event) }
               aria-label="Playlist name" />
@@ -41,7 +41,7 @@
           {/if}
 
           <p class="text-muted mt-3">
-            { tracks.size | pluralize('song') }{#if tracks.size > 0} · { totalMin } min{/if}
+            { pluralize(tracks.length, 'song') }{#if tracks.length > 0} · { totalMin } min{/if}
           </p>
 
           <div class="mt-2">
@@ -57,7 +57,7 @@
       </div>
     </header>
 
-    {#if tracks.size > 0}
+    {#if tracks.length > 0}
       <section class="flex flex-col">
         {#for track in tracks, i}
           <TrackRow

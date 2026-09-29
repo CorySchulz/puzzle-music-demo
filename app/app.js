@@ -34,10 +34,10 @@ const app = new PuzzleApp({
   // Point apiURL at a CDN/host later and the same endpoints follow it.
   apiURL: '',
 
-  // Display-only formatters (logic belongs in data()). `duration` turns a track's
-  // durationSec into m:ss. Play counts use the standard `compact_number` and
-  // labels the standard `pluralize`, so the app registers only what the standard
-  // set lacks.
+  // App template functions (display-only; logic belongs in data()). Templates
+  // call them bare, like the standard library: `{ duration(track.durationSec) }`
+  // turns seconds into m:ss beside the standard `compact_number(n)` and
+  // `pluralize(n, 'song')`, so the app registers only what the library lacks.
   formatters: {
     duration: (sec) => {
       const s = Math.max(0, Math.round(Number(sec) || 0));

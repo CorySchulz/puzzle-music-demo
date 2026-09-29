@@ -22,7 +22,7 @@
          track name plays it too. Same `play` callback prop as the number. -->
     <button class="min-w-0 text-left hover:no-underline" title="Play" @click={ play(event) }>
       <div class="truncate font-medium {#if current}text-accent{/if}{#if !current}text-fg{/if}">{ track.title }</div>
-      <div class="text-xs text-muted">{ track.plays | compact_number } plays</div>
+      <div class="text-xs text-muted">{ compact_number(track.plays) } plays</div>
     </button>
 
     <!-- `relative` so the context-menu popover can anchor to this cluster (the
@@ -56,7 +56,7 @@
         <Icon name="dots" size={ 16 } />
       </button>
 
-      <span class="text-sm text-muted tabular-nums w-10 text-right">{ track.durationSec | duration }</span>
+      <span class="text-sm text-muted tabular-nums w-10 text-right">{ duration(track.durationSec) }</span>
 
       {#if menuOpen}
         <!-- z-30 keeps the popover under the queue drawer (z-40). Playlists are
@@ -64,7 +64,7 @@
         <div class="absolute right-0 top-full z-30 mt-1 min-w-48 py-1 rounded-xl bg-elevated ring-1 ring-hairline border border-line shadow-2xl shadow-black/50 text-sm">
           <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors" @click={ menuPlayNext(event) }>Play next</button>
           <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors" @click={ menuAddToQueue(event) }>Add to queue</button>
-          {#if playlists.size > 0}
+          {#if playlists.length > 0}
             <div class="border-t border-line my-1"></div>
             {#for pl in playlists, i}
               <button class="w-full text-left px-3 py-2 text-fg hover:bg-surface-2 transition-colors truncate" @click={ menuAddToPlaylist(pl) }>Add to { pl.name }</button>
