@@ -34,8 +34,8 @@
           <div class="h-full rounded-full bg-accent" style="width:{ progressPct }%"></div>
         </div>
         <div class="flex justify-between mt-1.5 text-[11px] tabular-nums text-faint">
-          <span>{ progressSec | duration }</span>
-          <span>{ durationSec | duration }</span>
+          <span>{ duration(progressSec) }</span>
+          <span>{ duration(durationSec) }</span>
         </div>
       </div>
 

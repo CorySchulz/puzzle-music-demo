@@ -22,7 +22,7 @@
          track name plays it too. Same `play` callback prop as the number. -->
     <button class="min-w-0 text-left hover:no-underline" title="Play" @click={ play(event) }>
       <div class="truncate font-medium {#if current}text-accent{/if}{#if !current}text-fg{/if}">{ track.title }</div>
-      <div class="text-xs text-muted">{ track.plays | compact } plays</div>
+      <div class="text-xs text-muted">{ compact_number(track.plays) } plays</div>
     </button>
 
     <!-- `relative` so the context-menu popover can anchor to this cluster (the
@@ -56,7 +56,7 @@
         <Icon name="dots" size={ 16 } />
       </button>
 
-      <span class="text-sm text-muted tabular-nums w-10 text-right">{ track.durationSec | duration }</span>
+      <span class="text-sm text-muted tabular-nums w-10 text-right">{ duration(track.durationSec) }</span>
 
       {#if menuOpen}
         <!-- z-30 keeps the popover under the queue drawer (z-40). Playlists are

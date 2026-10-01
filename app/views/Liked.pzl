@@ -15,7 +15,7 @@
         <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted mb-2">Playlist</div>
         <h1 class="font-display text-3xl sm:text-5xl font-bold text-fg leading-tight">Liked Songs</h1>
         <p class="text-muted mt-3">
-          { tracks.length } { tracks.length | plural('song', 'songs') } · { totalMin } min
+          { pluralize(tracks.length, 'song') } · { totalMin } min
         </p>
       </div>
     </div>

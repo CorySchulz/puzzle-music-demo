@@ -7,7 +7,7 @@
     <h1 class="font-display text-3xl font-bold text-fg">
       {#if hour < 5}Night owl session{:else if hour < 12}Good morning{:else if hour < 18}Good afternoon{:else}Good evening{/if}
     </h1>
-    <p class="text-muted mt-1">{ artists.length } { artists.length | plural('artist', 'artists') } · { albums.length } albums in your library</p>
+    <p class="text-muted mt-1">{ pluralize(artists.length, 'artist') } · { pluralize(albums.length, 'album') } in your library</p>
   </header>
 
   <!-- Quick picks — Spotify-style wide tiles: a small square gradient tile + a
@@ -35,7 +35,7 @@
       <h2 class="font-display text-xl font-bold text-fg mb-4">Recently played</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
         {#for row in recentRows, i}
-          <AlbumCard album={ row.album } artistName={ row.artistName } index={ i } />
+          <AlbumCard key={ row.album.id } album={ row.album } artistName={ row.artistName } index={ i } />
         {/for}
       </div>
     </section>
@@ -54,7 +54,7 @@
     <h2 class="font-display text-xl font-bold text-fg mb-4">Albums</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-6">
       {#for row in albumRows, i}
-        <AlbumCard album={ row.album } artistName={ row.artistName } index={ i } />
+        <AlbumCard key={ row.album.id } album={ row.album } artistName={ row.artistName } index={ i } />
       {/for}
     </div>
   </section>

@@ -30,11 +30,11 @@
           </button>
         </div>
         <div class="hidden sm:flex items-center gap-2 w-full">
-          <span class="text-[11px] tabular-nums text-faint w-9 text-right">{ progressSec | duration }</span>
+          <span class="text-[11px] tabular-nums text-faint w-9 text-right">{ duration(progressSec) }</span>
           <div class="flex-1 h-1 rounded-full bg-elevated overflow-hidden cursor-pointer" title="Seek" @click={ seek(event) }>
             <div class="h-full rounded-full bg-fg" style="width:{ progressPct }%"></div>
           </div>
-          <span class="text-[11px] tabular-nums text-faint w-9">{ durationSec | duration }</span>
+          <span class="text-[11px] tabular-nums text-faint w-9">{ duration(durationSec) }</span>
         </div>
       </div>
 

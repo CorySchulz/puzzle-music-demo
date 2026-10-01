@@ -20,11 +20,11 @@
                `event.key` checks. Enter saves, Escape cancels; focus is grabbed
                once in afterUpdate().
 
-               `String(playlist.name)` is deliberate: puzzle 0.5.0 auto-binds a
-               handler-less `value={ playlist.name }` two-way, which would write
-               the record on every keystroke and make Escape-cancel impossible.
-               Wrapping it in a non-path expression opts out and keeps the
-               edit-buffer semantics this showcase is about. -->
+               `String(playlist.name)` is deliberate: a handler-less
+               `value={ playlist.name }` binds two-way, which would write the
+               record on every keystroke and make Escape-cancel impossible. A
+               call is not a bindable path, so it opts out and keeps the edit-buffer
+               semantics this showcase is about. -->
           {#if renaming}
             <input
               type="text"
@@ -41,7 +41,7 @@
           {/if}
 
           <p class="text-muted mt-3">
-            { tracks.length } { tracks.length | plural('song', 'songs') }{#if tracks.length > 0} · { totalMin } min{/if}
+            { pluralize(tracks.length, 'song') }{#if tracks.length > 0} · { totalMin } min{/if}
           </p>
 
           <div class="mt-2">
