@@ -39,11 +39,11 @@ The same repo also deploys to Cloudflare, at
 static assets (`wrangler.jsonc`), with cache headers in `app/public/_headers`.
 
 ```bash
-npm run deploy   # build, then wrangler deploy
+npm run deploy   # build, then wrangler deploy, by hand
 ```
 
-For a git-connected build, connect the repo under **Workers & Pages** in the
-Cloudflare dashboard with:
+Every push to `main` deploys by itself: the repo is connected to the Worker
+under **Workers & Pages** in the Cloudflare dashboard, with:
 
 | Setting | Value |
 | --- | --- |
