@@ -31,7 +31,7 @@ npm run build    # production build → dist/
 The repo ships a `vercel.json` that tells Vercel to run `npm run build` and
 serve the `dist/` folder. Import the repo into Vercel and it deploys as-is —
 the `puzzle` CLI installs from npm with a prebuilt Linux binary, so the build
-runs fine on Vercel's machines. Vercel picks Node 24 from `engines` in
+runs fine on Vercel's machines. Vercel picks Node 26 from `engines` in
 `package.json`.
 
 Because the app runs in **hash mode**, the built `dist/` hosts on any static
