@@ -24,7 +24,7 @@ import Icon from '../components/Icon.pzl';
 // rest of the app, so arriving here is a layout swap: AppLayout animates out, this
 // slides up. Closing routes back to the current track's album (or home).
 export default class PlayerLayout extends PuzzleView {
-  data({ params, props }) {
+  data() {
     return {};
   }
 

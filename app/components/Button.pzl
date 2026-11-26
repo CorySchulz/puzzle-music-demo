@@ -14,7 +14,7 @@ import { PuzzleView } from '@magic-spells/puzzle';
 // Reusable button (component mode renders inline — no wrapper, single root, D20).
 // Label content projects through <Children/>; `press` is a callback prop (D16).
 export default class Button extends PuzzleView {
-  data({ params, props }) {
+  data({ props }) {
     return {
       variant: props.variant || 'primary',
       type: props.type || 'button',

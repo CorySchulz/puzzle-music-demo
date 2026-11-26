@@ -70,7 +70,7 @@ export default class SearchView extends PuzzleView {
     this.setState({ query: '' });
   }
 
-  data({ params, props }) {
+  data() {
     const store = this.ctx.store;
     const query = this.getData().query || '';
     const q = query.trim().toLowerCase();
@@ -113,18 +113,14 @@ export default class SearchView extends PuzzleView {
   }
 
   events = {
-    // Manual bind: setData reflects the keystroke, refresh() re-runs data() so the
-    // derived result lists recompute (setData alone does not re-run data(), SPEC §4).
-    updateQuery: (event) => {
-      this.setState('query', event.target.value);
-      this.refresh();
-    },
+    // Manual bind: data() reads query, so each keystroke re-runs it and the
+    // derived result lists recompute (SPEC §4).
+    updateQuery: (event) => this.setState('query', event.target.value),
     // Escape clears the field and blurs it. `@keydown:escape` is a D38 key-filtered
     // binding (SPEC §5) — the handler only fires on the Escape key, no manual
-    // event.key check. setData + refresh re-runs data() so the results reset.
+    // event.key check. The setState re-runs data(), so the results reset.
     clearQuery: (event) => {
       this.setState('query', '');
-      this.refresh();
       if (event.target) event.target.blur();
     },
     playTrack: (track) => {

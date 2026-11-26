@@ -4,7 +4,7 @@
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // The empty index leaf for /artist/:id (path '') so the parent ArtistView always
-// has a child to render at its <Slot/>. Renders nothing (hidden); its only job is
+// has a child to render at its <Outlet/>. Renders nothing (hidden); its only job is
 // to occupy the slot when no dialog is open. Navigating to /artist/:id/info swaps
 // ArtistInfoDialog in here, and the router morphs the shared data-puzzle-morph
 // element (the Info button ↔ the dialog shell). NO animations field — a view that

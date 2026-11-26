@@ -115,7 +115,7 @@ export default class LibraryView extends PuzzleView {
   // Async data() (SPEC §16, D39): the <puzzle-skeleton> above is the first paint
   // while this resolves, then the real Home patches in. The store is seeded in
   // beforeMount.
-  async data({ params, props }) {
+  async data() {
     const store = this.ctx.store;
     const artists = store.findMany('artist');
     const albums = store.findMany('album');

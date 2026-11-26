@@ -119,7 +119,7 @@ export default class PlaylistView extends PuzzleView {
   // Async data() (SPEC §16, D39): the compact <puzzle-skeleton> shows while this
   // resolves. Playlists are created at the tail of the beforeMount seed, so a
   // missing playlist is a genuine not-found.
-  async data({ params, props }) {
+  async data({ params }) {
     const store = this.ctx.store;
     const playlist = store.findOne('playlist', params.id);
     // Join the ordered id list to real track records, dropping any that no
@@ -137,9 +137,6 @@ export default class PlaylistView extends PuzzleView {
       headerGlow: playlist && playlist.accent ? (playlist.accent.from || '#7c5cff') + '4d' : '',
       trackIds: tracks.map((t) => t.id),
       totalMin: Math.max(1, Math.round(totalSec / 60)),
-      // Local UI flag for the inline rename (setData does not re-run data(), so
-      // we read it back through getData — same pattern as the layout's queueOpen).
-      renaming: this.getData().renaming || false,
       currentTrackId: player ? player.currentTrackId : '',
       isPlaying: player ? player.isPlaying : false
     };
@@ -149,17 +146,14 @@ export default class PlaylistView extends PuzzleView {
     startRename: () => {
       this.setState('renaming', true);
       this._focusRename = true; // afterUpdate grabs focus once
-      this.refresh();
     },
     saveRename: (event) => {
       const p = this.getData().playlist;
       if (p) p.rename(event.target.value); // rename() no-ops on empty
       this.setState('renaming', false);
-      this.refresh();
     },
     cancelRename: () => {
       this.setState('renaming', false);
-      this.refresh();
     },
     playPlaylist: () => {
       const player = this._player();

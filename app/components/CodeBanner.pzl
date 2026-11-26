@@ -44,7 +44,7 @@ const SHOW_DELAY = 1200;
 // view; dismissal is remembered for the tab session (sessionStorage), so it
 // shows once per visit rather than nagging on every navigation.
 export default class CodeBanner extends PuzzleView {
-  data({ params, props }) {
+  data() {
     return { visible: this.getData().visible || false };
   }
 

@@ -1,7 +1,7 @@
 <puzzle-view class="h-dvh flex flex-col bg-bg text-fg overflow-hidden">
   <div class="flex-1 flex min-h-0">
     <!-- Sidebar. Stays mounted across Library/Artist/Album/Search navigations
-         because they all reuse this layout — only <Slot/> swaps. -->
+         because they all reuse this layout — only <Outlet/> swaps. -->
     <aside class="hidden sm:flex w-60 shrink-0 flex-col bg-surface border-r border-line p-3">
       <a href="#/" class="flex items-center gap-2.5 px-3 py-3 mb-4 font-display text-lg font-bold text-fg hover:no-underline">
         <span class="inline-block w-7 h-7 rounded-lg" style="background:linear-gradient(135deg,#7c5cff,#22d3ee)"></span>
@@ -129,7 +129,7 @@ export default class AppLayout extends PuzzleView {
   // leaf is 'artist-index' / 'artist-info' while the section it belongs to is
   // still 'artist'. chain[0].name is 'artist' for both — flat routes are a
   // one-element chain, so every other comparison is unchanged.
-  data({ params, props }) {
+  data() {
     const name = this.route.chain[0].name;
     // Playlist-ish routes (the index, a single playlist, Liked Songs) light the
     // mobile nav's Playlists tab; everything browse-y stays under 'library'.
@@ -152,17 +152,15 @@ export default class AppLayout extends PuzzleView {
       .findMany('playlist')
       .slice()
       .sort((a, b) => a.order - b.order);
-    return { queueOpen: this.getData().queueOpen, section, artists, playlists };
+    return { section, artists, playlists };
   }
 
   events = {
     toggleQueue: () => {
       this.setState('queueOpen', !this.getData().queueOpen);
-      this.refresh();
     },
     closeQueue: () => {
       this.setState('queueOpen', false);
-      this.refresh();
     },
     // Create a fresh empty playlist and navigate to it — the user lands on the
     // new page and renames it inline. createRecord notifies subscribers, so the

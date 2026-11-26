@@ -16,14 +16,14 @@ import PlayerLayout from './layouts/PlayerLayout.pzl';
 // Two layouts on purpose (constellation/doc/DOC-SPEC.md §12, D28):
 //   • Library / Artist / Album / Search / 404 all share AppLayout, so navigating
 //     between them is a "view swap inside a reused layout" — the sidebar and the
-//     persistent MiniPlayer stay mounted, only the <Slot/> animates.
+//     persistent MiniPlayer stay mounted, only the <Outlet/> animates.
 //   • /now-playing rides a DIFFERENT layout (PlayerLayout). Routing to it is a
 //     layout SWAP: the whole shell animates out as a unit and the full-screen
 //     player animates in. Routing back swaps them the other way.
 export default [
   { path: '/',            name: 'library',     view: LibraryView,    layout: AppLayout,    meta: { title: 'Your Library · Puzzle Sounds' } },
   // Artist gains an overlay child (v1.3 nested routes, D30): the ArtistView stays
-  // mounted (its Info button survives) while ArtistInfoDialog swaps into <Slot/>,
+  // mounted (its Info button survives) while ArtistInfoDialog swaps into <Outlet/>,
   // the shape the router-driven morph needs (D55). Relative child paths; the
   // parent keeps its layout + name.
   {

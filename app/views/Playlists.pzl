@@ -45,7 +45,7 @@ import Icon from '../components/Icon.pzl';
 // sidebar already lists every playlist, so this page mainly serves small screens
 // where that sidebar is hidden; it stays reachable at /playlists either way.
 export default class PlaylistsView extends PuzzleView {
-  data({ params, props }) {
+  data() {
     const store = this.ctx.store;
     // findMany subscribes this view, so creating/renaming a playlist (or liking
     // a track) updates the list without any manual refresh.

@@ -15,7 +15,7 @@ import models from './models/index.js';
 import { loadState, saveState } from './storage.js';
 
 // The v1 config surface is intentionally small: target, routes, models,
-// formatters, apiURL — see constellation/doc/DOC-SPEC.md §2.
+// functions, apiURL — see constellation/doc/DOC-SPEC.md §2.
 const app = new PuzzleApp({
   target: '#app',
   routes,

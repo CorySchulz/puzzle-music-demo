@@ -109,7 +109,7 @@ import { PuzzleView } from '@magic-spells/puzzle';
 // Reusable inline-SVG icon (component mode renders inline — no wrapper, single
 // <svg> root, D20). `name` selects the glyph; `size` sets width/height (px).
 export default class Icon extends PuzzleView {
-  data({ params, props }) {
+  data({ props }) {
     return {
       name: props.name,
       size: props.size || 20
