@@ -1,0 +1,29 @@
+{
+	// Cloudflare Workers static-assets config. `npm run deploy` and the
+	// dashboard's git-connected build both deploy with `npx wrangler deploy`,
+	// which reads this.
+	//
+	// Assets-only: there is no `main`, because nothing runs at request time.
+	// `npm run build` writes dist/ and Workers just serves it. Cache headers
+	// live in app/public/_headers, copied to dist/_headers by the build.
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "puzzle-music-demo",
+	"compatibility_date": "2026-11-23",
+	"assets": {
+		"directory": "./dist/",
+
+		// No "not_found_handling": the app is hash-routed, so the route rides in
+		// the #fragment and the server only ever sees / and real files. An
+		// unknown path returns Cloudflare's plain 404. "single-page-application"
+		// would answer a missing .mp3 with the shell and a 200 instead.
+	},
+
+	// Required by Worker Previews: Workers Builds runs `npx wrangler preview`
+	// for every branch but the production one. Empty, because a Preview needs
+	// no settings of its own.
+	"previews": {},
+
+	// magicspells.io is a zone in the same account, so the first deploy creates
+	// the DNS record and certificate for this hostname.
+	"routes": [{ "pattern": "puzzle-music-demo.magicspells.io", "custom_domain": true }],
+}

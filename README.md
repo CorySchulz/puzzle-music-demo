@@ -34,6 +34,25 @@ the `puzzle` CLI installs from npm with a prebuilt Linux binary, so the build
 runs fine on Vercel's machines. Vercel picks Node 26 from `engines` in
 `package.json`.
 
+The same repo also deploys to Cloudflare, at
+**https://puzzle-music-demo.magicspells.io**: a Worker that serves `dist/` as
+static assets (`wrangler.jsonc`), with cache headers in `app/public/_headers`.
+
+```bash
+npm run deploy   # build, then wrangler deploy
+```
+
+For a git-connected build, connect the repo under **Workers & Pages** in the
+Cloudflare dashboard with:
+
+| Setting | Value |
+| --- | --- |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+
+Workers Builds defaults to Node 24; to build on 26 like Vercel, also add the
+build variable `NODE_VERSION` = `26`.
+
 Because the app runs in **hash mode**, the built `dist/` hosts on any static
 host — GitHub Pages, S3, `file://` — with **zero rewrite rules**: the route
 rides in `location.hash` (`…/index.html#/album/x`), so the server only ever

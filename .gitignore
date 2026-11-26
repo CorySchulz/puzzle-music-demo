@@ -24,3 +24,6 @@ npm-debug.log*
 
 # Puzzle cached files
 .puzzle/
+
+# Wrangler local state
+.wrangler/

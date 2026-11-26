@@ -6,7 +6,8 @@
   "main": "app.js",
   "scripts": {
     "dev": "puzzle dev",
-    "build": "puzzle build"
+    "build": "puzzle build",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@magic-spells/morph-engine": "^0.4.0",
@@ -14,7 +15,8 @@
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.14",
-    "tailwindcss": "^4.1.14"
+    "tailwindcss": "^4.1.14",
+    "wrangler": "^4.168.0"
   },
   "type": "module",
   "engines": {

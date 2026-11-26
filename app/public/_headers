@@ -1,0 +1,37 @@
+# cloudflare pages headers for a puzzle app (spa, hybrid or static output).
+# written by `puzzle add deploy cloudflare` into app/public/, so puzzle build
+# copies it to dist/_headers, where cloudflare pages reads it.
+#
+# routing needs no file: with no top-level 404.html, pages serves the shell
+# for every path that is not a file (spa). with a 404.html (static output, or
+# hybrid with a catch-all route), pages serves the nearest 404.html with a 404
+# status, so dist/es/404.html covers /es/... by itself.
+
+# hashed production names change on every build that changes their content,
+# so browsers may keep them for a year without asking again.
+# app-<hash>.js / app-<hash>.css: the spa and hybrid entry and its css.
+/app-*.js
+  Cache-Control: public, max-age=31536000, immutable
+/app-*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# styles-<hash>.css: the composed stylesheet.
+/styles-*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# chunks/: lazy chunks from build.splitting (spa and hybrid).
+/chunks/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# _puzzle/chunks/: shared code between static pages.
+/_puzzle/chunks/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# locales/<tag>.<hash>.json: translation tables (i18n).
+/locales/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# music/*.mp3: not hashed, so a day, not a year. the audio element always sends
+# a range header, and workers drop their default cache-control on those.
+/music/*
+  Cache-Control: public, max-age=86400
