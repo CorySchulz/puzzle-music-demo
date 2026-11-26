@@ -18,6 +18,8 @@ pretending to be the real thing.
 
 ## Run it
 
+Built on Puzzle 0.10, which needs Node 24 or later.
+
 ```bash
 npm install
 npm run dev      # watch + rebuild + live-reload dev server
@@ -29,7 +31,8 @@ npm run build    # production build → dist/
 The repo ships a `vercel.json` that tells Vercel to run `npm run build` and
 serve the `dist/` folder. Import the repo into Vercel and it deploys as-is —
 the `puzzle` CLI installs from npm with a prebuilt Linux binary, so the build
-runs fine on Vercel's machines.
+runs fine on Vercel's machines. Vercel picks Node 24 from `engines` in
+`package.json`.
 
 Because the app runs in **hash mode**, the built `dist/` hosts on any static
 host — GitHub Pages, S3, `file://` — with **zero rewrite rules**: the route
@@ -76,7 +79,7 @@ enableMorph(app);           // pairs data-puzzle-morph elements across route swa
 
 `/artist/:id` gains an overlay **child route** (`{ path: 'info', view:
 ArtistInfoDialog }`), so pushing it keeps `Artist.pzl` mounted and swaps the
-dialog into its `<Slot/>` — the button survives for the router to morph into the
+dialog into its `<Outlet/>` — the button survives for the router to morph into the
 dialog and, on close, fly back home. Because it's route-driven, the **browser
 back button morphs too**, and `/artist/:id/info` is a real deep link (the initial
 navigation renders the dialog plain — nothing to morph from yet). The dialog is a
@@ -135,8 +138,8 @@ app/
 │   └── PlayerLayout.pzl# full-screen player chrome (a layout SWAP away from AppLayout)
 ├── views/
 │   ├── Library.pzl     # Home: greeting, quick picks, recently played, artist/album grids
-│   ├── Artist.pzl      # header glow, popular tracks, album grid; "Info" morph button + <Slot/>
-│   ├── ArtistIndexChild.pzl # empty index leaf for /artist/:id (fills the Slot when no dialog)
+│   ├── Artist.pzl      # header glow, popular tracks, album grid; "Info" morph button + <Outlet/>
+│   ├── ArtistIndexChild.pzl # empty index leaf for /artist/:id (fills the Outlet when no dialog)
 │   ├── ArtistInfoDialog.pzl # /artist/:id/info overlay: router-morphed dialog (D55)
 │   ├── Album.pzl       # header glow, track list
 │   ├── Playlist.pzl    # header glow, inline rename, remove/delete
@@ -153,7 +156,7 @@ app/
 │   ├── QueueDialog.pzl # centered modal queue; morphs out of the MiniPlayer's Queue button
 │   ├── Toast.pzl       # global pill, nonce-keyed auto-dismiss
 │   ├── EqualizerBars.pzl# now-playing visualizer, rippling bars
-│   └── Button.pzl      # reusable pill button, label via <Slot/>
+│   └── Button.pzl      # reusable pill button, label via <Children/>
 └── public/
     ├── index.html      # mount target
     └── artists.json / albums.json / tracks.json   # flat seed data (D21 read path)

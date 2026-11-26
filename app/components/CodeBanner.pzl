@@ -44,13 +44,13 @@ const SHOW_DELAY = 1200;
 // view; dismissal is remembered for the tab session (sessionStorage), so it
 // shows once per visit rather than nagging on every navigation.
 export default class CodeBanner extends PuzzleView {
-  data(params, props) {
+  data() {
     return { visible: this.getData().visible || false };
   }
 
   events = {
     dismiss: () => {
-      this.setData('visible', false);
+      this.setState('visible', false);
       try {
         sessionStorage.setItem(STORAGE_KEY, '1');
       } catch (err) {
@@ -70,7 +70,7 @@ export default class CodeBanner extends PuzzleView {
     }
     if (dismissed) return;
     // Let the app's entrance animations land before the card slides in.
-    this._timer = setTimeout(() => this.setData('visible', true), SHOW_DELAY);
+    this._timer = setTimeout(() => this.setState('visible', true), SHOW_DELAY);
   }
 
   destroyed() {

@@ -32,7 +32,7 @@ import { PuzzleView } from '@magic-spells/puzzle';
 import Icon from './Icon.pzl';
 
 export default class AlbumCard extends PuzzleView {
-  data(params, props) {
+  data({ props }) {
     return {
       album: props.album,
       artistName: props.artistName || ''

@@ -66,7 +66,7 @@ import Icon from './Icon.pzl';
 // writes progressSec into the record, so this view (and NowPlaying, and any
 // future surface) just renders whatever the record says.
 export default class MiniPlayer extends PuzzleView {
-  data(params, props) {
+  data() {
     const store = this.ctx.store;
     const player = store.findMany('player')[0] || null;
     const track = player && player.currentTrackId ? store.findOne('track', player.currentTrackId) : null;

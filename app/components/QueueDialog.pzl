@@ -98,7 +98,7 @@ export default class QueueDialog extends PuzzleView {
   // Mirrors the `open` prop; afterUpdate drives the engine only on the flip.
   _shown = false;
 
-  data(params, props) {
+  data({ props }) {
     const store = this.ctx.store;
     const player = store.findMany('player')[0] || null;
     const currentId = player ? player.currentTrackId : '';

@@ -15,7 +15,7 @@ import models from './models/index.js';
 import { loadState, saveState } from './storage.js';
 
 // The v1 config surface is intentionally small: target, routes, models,
-// formatters, apiURL — see constellation/doc/DOC-SPEC.md §2.
+// functions, apiURL — see constellation/doc/DOC-SPEC.md §2.
 const app = new PuzzleApp({
   target: '#app',
   routes,
@@ -38,7 +38,7 @@ const app = new PuzzleApp({
   // call them bare, like the standard library: `{ duration(track.durationSec) }`
   // turns seconds into m:ss beside the standard `compact_number(n)` and
   // `pluralize(n, 'song')`, so the app registers only what the library lacks.
-  formatters: {
+  functions: {
     duration: (sec) => {
       const s = Math.max(0, Math.round(Number(sec) || 0));
       const m = Math.floor(s / 60);

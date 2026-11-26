@@ -80,7 +80,7 @@ import Icon from '../components/Icon.pzl';
 export default class LikedView extends PuzzleView {
   // Async data() (SPEC §16, D39): the compact <puzzle-skeleton> shows while this
   // resolves — likes are restored during the beforeMount seed.
-  async data(params, props) {
+  async data() {
     const store = this.ctx.store;
     // Every liked track, sorted alphabetically by title (a stable, predictable
     // order for a cross-album collection — plays would reshuffle as you listen).

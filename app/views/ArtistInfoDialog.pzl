@@ -41,7 +41,7 @@
 import { PuzzleView } from '@magic-spells/puzzle';
 
 // Routed overlay for an artist's details — the leaf child of the artist route
-// (path 'info'), rendered inside ArtistView's <Slot/> so the artist page (and the
+// (path 'info'), rendered inside ArtistView's <Outlet/> so the artist page (and the
 // Info button that opened it) stays mounted beneath it. There is ZERO morph code
 // in this view: the <dialog> shell shares its morph id with the button via
 // data-puzzle-morph-target, and the router pairs them on the way in and out (D55)
@@ -64,7 +64,7 @@ export default class ArtistInfoDialog extends PuzzleView {
   // Looks the artist up (findOne) from the store, seeded in beforeMount. By the
   // time you're on the artist page and open this, the seed has long resolved; on a
   // deep link it renders plain (no morph).
-  async data(params) {
+  async data({ params }) {
     const artist = this.ctx.store.findOne('artist', params.id);
     return {
       artistId: params.id,

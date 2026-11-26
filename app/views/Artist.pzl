@@ -74,7 +74,7 @@
        ArtistIndexChild (empty) at /artist/:id, or ArtistInfoDialog at
        /artist/:id/info. This view stays mounted across that swap, so the Info
        button survives for the router to morph into the dialog and back (D55). -->
-  <Slot/>
+  <Outlet/>
 </puzzle-view>
 
 <!-- Loading template (SPEC §16, D39). Because this routed view declares a
@@ -115,7 +115,7 @@ export default class ArtistView extends PuzzleView {
   // Async data() (SPEC §16, D39): the <puzzle-skeleton> above shows while this
   // resolves, then the real content patches in. The store is fully seeded in
   // beforeMount, so an absent artist is a genuine not-found, not a mid-load blank.
-  async data(params, props) {
+  async data({ params }) {
     const store = this.ctx.store;
     const artist = store.findOne('artist', params.id);
     const albums = store

@@ -84,7 +84,7 @@ import Icon from '../components/Icon.pzl';
 // record, so this view and the MiniPlayer read one already-advancing position
 // and neither has to hand the other a timer across the layout swap.
 export default class NowPlayingView extends PuzzleView {
-  data(params, props) {
+  data() {
     const store = this.ctx.store;
     const player = store.findMany('player')[0] || null;
     const track = player && player.currentTrackId ? store.findOne('track', player.currentTrackId) : null;
