@@ -1,6 +1,6 @@
 # Puzzle Sounds
 
-**[View the app live →](https://puzzle-music-demo.vercel.app/)**
+**[View the app live →](https://puzzle-music-demo.magicspells.io/)**
 
 A Spotify-style music app built with the
 [Puzzle framework](https://github.com/magic-spells/puzzle) — browse a library of

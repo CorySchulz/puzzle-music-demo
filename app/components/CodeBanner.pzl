@@ -14,11 +14,11 @@
         <div class="min-w-0 flex-1">
           <p class="text-sm text-fg leading-snug">You can view the code for this demo here</p>
           <a
-            href="https://github.com/CorySchulz/puzzle-music-demo"
+            href="https://github.com/magic-spells/puzzle-music-demo"
             target="_blank"
             rel="noopener noreferrer"
             class="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline">
-            CorySchulz/puzzle-music-demo
+            magic-spells/puzzle-music-demo
             <Icon name="external" size={ 13 } />
           </a>
         </div>
