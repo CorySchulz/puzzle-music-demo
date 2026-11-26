@@ -90,7 +90,7 @@ import Icon from './Icon.pzl';
 // / navigate) driven by a local `menuOpen` flag, plus the toast notifications
 // those actions fire.
 export default class TrackRow extends PuzzleView {
-  data(params, props) {
+  data({ params, props }) {
     // Read playlists here (findMany subscribes this row) so the menu's
     // add-to-playlist list stays live as playlists are created/deleted.
     const playlists = this.ctx.store
@@ -125,7 +125,7 @@ export default class TrackRow extends PuzzleView {
 
     // Toggle the context menu open/closed.
     toggleMenu: () => {
-      this.setData('menuOpen', !this.getData().menuOpen);
+      this.setState('menuOpen', !this.getData().menuOpen);
       this.refresh();
     },
 
@@ -186,7 +186,7 @@ export default class TrackRow extends PuzzleView {
 
   _closeMenu() {
     if (!this.getData().menuOpen) return;
-    this.setData('menuOpen', false);
+    this.setState('menuOpen', false);
     this.refresh();
   }
 

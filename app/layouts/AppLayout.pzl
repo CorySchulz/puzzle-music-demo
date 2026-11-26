@@ -52,7 +52,7 @@
       <!-- pb-40 on mobile clears the floating dock below, so the last row can
            scroll up past it instead of sitting under the blur. -->
       <div class="max-w-5xl mx-auto px-5 sm:px-8 py-8 pb-40 sm:pb-8">
-        <Slot/>
+        <Outlet/>
       </div>
     </main>
   </div>
@@ -114,7 +114,7 @@ import Icon from '../components/Icon.pzl';
 
 export default class AppLayout extends PuzzleView {
   created() {
-    this.setData({ queueOpen: false });
+    this.setState({ queueOpen: false });
   }
 
   // data() re-runs on every navigation that reuses this layout (SPEC §9), so the
@@ -129,7 +129,7 @@ export default class AppLayout extends PuzzleView {
   // leaf is 'artist-index' / 'artist-info' while the section it belongs to is
   // still 'artist'. chain[0].name is 'artist' for both — flat routes are a
   // one-element chain, so every other comparison is unchanged.
-  data(params, props) {
+  data({ params, props }) {
     const name = this.route.chain[0].name;
     // Playlist-ish routes (the index, a single playlist, Liked Songs) light the
     // mobile nav's Playlists tab; everything browse-y stays under 'library'.
@@ -157,11 +157,11 @@ export default class AppLayout extends PuzzleView {
 
   events = {
     toggleQueue: () => {
-      this.setData('queueOpen', !this.getData().queueOpen);
+      this.setState('queueOpen', !this.getData().queueOpen);
       this.refresh();
     },
     closeQueue: () => {
-      this.setData('queueOpen', false);
+      this.setState('queueOpen', false);
       this.refresh();
     },
     // Create a fresh empty playlist and navigate to it — the user lands on the

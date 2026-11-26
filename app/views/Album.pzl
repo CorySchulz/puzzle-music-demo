@@ -86,7 +86,7 @@ export default class AlbumView extends PuzzleView {
   // Async data() (SPEC §16, D39): the <puzzle-skeleton> shows while this resolves,
   // then the real album patches in. The store is fully seeded in beforeMount, so a
   // missing album is a genuine not-found.
-  async data(params, props) {
+  async data({ params, props }) {
     const store = this.ctx.store;
     const album = store.findOne('album', params.id);
     const artist = album ? store.findOne('artist', album.artistId) : null;

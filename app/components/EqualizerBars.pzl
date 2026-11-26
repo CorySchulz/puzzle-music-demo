@@ -16,7 +16,7 @@ import { PuzzleView } from '@magic-spells/puzzle';
 
 // A tiny "now playing" visualizer. `playing` (bool prop) gates the animation.
 export default class EqualizerBars extends PuzzleView {
-  data(params, props) {
+  data({ params, props }) {
     return { playing: !!props.playing };
   }
 }

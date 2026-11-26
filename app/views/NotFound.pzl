@@ -10,7 +10,7 @@
 import { PuzzleView } from '@magic-spells/puzzle';
 
 export default class NotFoundView extends PuzzleView {
-  data(params, props) {
+  data({ params, props }) {
     return {};
   }
 

@@ -64,7 +64,7 @@ export default class ArtistInfoDialog extends PuzzleView {
   // Looks the artist up (findOne) from the store, seeded in beforeMount. By the
   // time you're on the artist page and open this, the seed has long resolved; on a
   // deep link it renders plain (no morph).
-  async data(params) {
+  async data({ params }) {
     const artist = this.ctx.store.findOne('artist', params.id);
     return {
       artistId: params.id,

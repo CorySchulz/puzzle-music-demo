@@ -38,7 +38,7 @@ const app = new PuzzleApp({
   // call them bare, like the standard library: `{ duration(track.durationSec) }`
   // turns seconds into m:ss beside the standard `compact_number(n)` and
   // `pluralize(n, 'song')`, so the app registers only what the library lacks.
-  formatters: {
+  functions: {
     duration: (sec) => {
       const s = Math.max(0, Math.round(Number(sec) || 0));
       const m = Math.floor(s / 60);

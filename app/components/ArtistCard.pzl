@@ -15,7 +15,7 @@
 import { PuzzleView } from '@magic-spells/puzzle';
 
 export default class ArtistCard extends PuzzleView {
-  data(params, props) {
+  data({ params, props }) {
     return { artist: props.artist };
   }
 

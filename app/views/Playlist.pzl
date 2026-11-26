@@ -119,7 +119,7 @@ export default class PlaylistView extends PuzzleView {
   // Async data() (SPEC §16, D39): the compact <puzzle-skeleton> shows while this
   // resolves. Playlists are created at the tail of the beforeMount seed, so a
   // missing playlist is a genuine not-found.
-  async data(params, props) {
+  async data({ params, props }) {
     const store = this.ctx.store;
     const playlist = store.findOne('playlist', params.id);
     // Join the ordered id list to real track records, dropping any that no
@@ -147,18 +147,18 @@ export default class PlaylistView extends PuzzleView {
 
   events = {
     startRename: () => {
-      this.setData('renaming', true);
+      this.setState('renaming', true);
       this._focusRename = true; // afterUpdate grabs focus once
       this.refresh();
     },
     saveRename: (event) => {
       const p = this.getData().playlist;
       if (p) p.rename(event.target.value); // rename() no-ops on empty
-      this.setData('renaming', false);
+      this.setState('renaming', false);
       this.refresh();
     },
     cancelRename: () => {
-      this.setData('renaming', false);
+      this.setState('renaming', false);
       this.refresh();
     },
     playPlaylist: () => {

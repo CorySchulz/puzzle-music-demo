@@ -22,7 +22,7 @@ import { PuzzleView } from '@magic-spells/puzzle';
 // (models/toast.js) via findMany, so any show() elsewhere re-runs data() and the
 // pill flashes. Rendered once by AppLayout, outside the queue-drawer conditional.
 export default class Toast extends PuzzleView {
-  data(params, props) {
+  data({ params, props }) {
     const toast = this.ctx.store.findMany('toast')[0] || null;
     return {
       message: toast ? toast.message : '',
